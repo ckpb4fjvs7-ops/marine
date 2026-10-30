@@ -1,0 +1,51 @@
+MARINE 360 — 2026-10-30
+npm run check: PASS (exit 0)
+TypeScript: PASS
+ESLint: 0 errors, 1 pre-existing exhaustive-deps warning at survey-explorer.tsx:1780
+Node test suite: 265 passed, 0 failed, 0 skipped
+Added navigation cases: 9
+Production build (Vite / Nitro Vercel preset): PASS
+Build retains dependency use-client directive warnings from framer-motion
+npm audit: 0 vulnerabilities at verification time (5 before targeted updates)
+Development UI: desktop 1440x1000 and mobile 390x844, 8 scenario groups each, PASS
+Built UI: desktop 1440x1000 and mobile 390x844, 8 scenario groups each, PASS
+Uncaught page errors during UI scenarios: 0
+GPS, Serial, BLE, echo sounder hardware and Telegram sending: not exercised
+Live AIS/weather/NAVTEX/tide accuracy and availability: not certified by smoke tests
+
+Ship size slider update — 2026-10-30
+TypeScript and build: PASS
+Ship model multiplier 0.25–4, original size at 1: PASS on desktop and mobile
+Independent from vertical exaggeration and retained across view switches: PASS
+Slider endpoints remain unobstructed by the alarm button: PASS
+Existing navigation UI scenario groups: 8 desktop + 8 mobile, PASS
+ESLint: 0 errors; original weather effect dependency warning remains
+
+Depth offset slider update — 2026-10-30
+TypeScript and build: PASS
+Three sliders visible and unobstructed on desktop and mobile: PASS
+Actual Three.js bed transform moves up/down; ship position/scale and sea surface unchanged: PASS
+Original survey geometry unchanged: PASS
+Offset retained across exaggeration and survey switches: PASS
+ESLint: 0 errors; pre-existing weather effect dependency warning remains
+
+Marine clock update — 2026-10-30
+TypeScript and production build: PASS
+Windows checkbox and side shortcut, close/reopen, dragging: PASS on desktop and mobile
+Baghdad/UTC digital time and dates across local midnight, live second updates: PASS
+Clock panel remains within viewport; visible in Model; theme switch: PASS
+ESLint: 0 errors; pre-existing weather effect dependency warning remains
+Clock time source: device clock
+
+Marine clock location label — 2026-10-30
+Local clock now labeled Basra / البصرة; Iraq IANA zone Asia/Baghdad retained (UTC+3)
+Basra/UTC time, midnight dates, clock controls and desktop/mobile appearance: PASS
+
+GitHub upload preflight — 2026-10-30
+npm run check: PASS
+TypeScript: PASS
+Node suite: 265 passed, 0 failed
+Build: PASS
+Secret patterns in tracked source: none found
+.env.local, node_modules, generated build output and test-results: excluded from Git
+Legacy preview credential moved to server environment only

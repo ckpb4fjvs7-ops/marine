@@ -1,0 +1,43 @@
+{
+  "url": "http://127.0.0.1:8081/",
+  "results": [
+    {
+      "name": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "checks": [
+        "onboarding, survey data and chart initialized",
+        "chart/model/both and river depth model switch",
+        "depth overlays, seamarks and chart orientation",
+        "manual position entry",
+        "two-waypoint route creation and clearing",
+        "VRM/EBL, past track and course line controls",
+        "sensor controls and baud selection (no hardware connection)",
+        "navigation window and theme switch"
+      ],
+      "pageErrors": [],
+      "status": "passed"
+    },
+    {
+      "name": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "checks": [
+        "onboarding, survey data and chart initialized",
+        "chart/model/both and river depth model switch",
+        "depth overlays, seamarks and chart orientation",
+        "manual position entry",
+        "two-waypoint route creation and clearing",
+        "VRM/EBL, past track and course line controls",
+        "sensor controls and baud selection (no hardware connection)",
+        "navigation window and theme switch"
+      ],
+      "pageErrors": [],
+      "status": "passed"
+    }
+  ]
+}

@@ -1,0 +1,686 @@
+{
+  "date": "2026-10-30",
+  "archive": "4yT56ZjGLIc3iiiE-grok-workspace.zip",
+  "archiveSHA256": "743b0440d98bf01b0cbae5763348583333a79f7d8d954220d882c44c4b85a784",
+  "scope": "Original application source, public assets, runtime scripts and configuration. Reference attachments and previous build products are preserved in the original archive, outside the development source. No secret contents are included in this manifest.",
+  "files": [
+    {
+      "path": "src/components/navtex-panel.tsx",
+      "originalSHA256": "276ba7292de53fc74b439bfe1c6a7d5be64d061056938691f3f26a7532347311",
+      "developmentSHA256": "276ba7292de53fc74b439bfe1c6a7d5be64d061056938691f3f26a7532347311",
+      "unchanged": true
+    },
+    {
+      "path": "src/components/preview-host-bridge.tsx",
+      "originalSHA256": "e4277e80ce127e7305057fb280d03d0703c5c7115b17d2e2aecf000e4867555e",
+      "developmentSHA256": "e4277e80ce127e7305057fb280d03d0703c5c7115b17d2e2aecf000e4867555e",
+      "unchanged": true
+    },
+    {
+      "path": "src/components/stars-background.tsx",
+      "originalSHA256": "07e8eb0987f4c506d892d5f8f06aca885bc91cd420324b5af1876362210421e8",
+      "developmentSHA256": "07e8eb0987f4c506d892d5f8f06aca885bc91cd420324b5af1876362210421e8",
+      "unchanged": true
+    },
+    {
+      "path": "src/components/startup-splash.tsx",
+      "originalSHA256": "b500db8e2d648758a46aff1240d9a57a135699844973b383649f1806299428bc",
+      "developmentSHA256": "b500db8e2d648758a46aff1240d9a57a135699844973b383649f1806299428bc",
+      "unchanged": true
+    },
+    {
+      "path": "src/components/StrokeText.css",
+      "originalSHA256": "572e1f8076a85a564f099496b8dac313a5e2e0a5afa9fc29db0f90089e711ad8",
+      "developmentSHA256": "572e1f8076a85a564f099496b8dac313a5e2e0a5afa9fc29db0f90089e711ad8",
+      "unchanged": true
+    },
+    {
+      "path": "src/components/StrokeText.jsx",
+      "originalSHA256": "3f80ead4418fdbb59fc9cd763a4d8f9f5cc85d8516a641d9050c92966861b673",
+      "developmentSHA256": "b86c77319b23d340bf4aea7ce56cc1e4602ff614f691d65d43ab139ee058b9e6",
+      "unchanged": false
+    },
+    {
+      "path": "src/components/survey-explorer.tsx",
+      "originalSHA256": "b6f993508a2486ed11c7c0559950f78c0972f63def54266468c68d557bbd4ae7",
+      "developmentSHA256": "fbc45b5754a37226c7da9ca7714edc3c1ec7f79b9e3cbce9435b9dd17117e4d7",
+      "unchanged": false
+    },
+    {
+      "path": "src/leaflet-rotate.d.ts",
+      "originalSHA256": "83813f31e86b7cbec7ca496b6bfa380653c171f2bd0672d59b863a114071e73e",
+      "developmentSHA256": "83813f31e86b7cbec7ca496b6bfa380653c171f2bd0672d59b863a114071e73e",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/ais-source.ts",
+      "originalSHA256": "5723e493a642bef1e4aab51f35e29202c92aeca2f1bb1a3f3fbdacb65b21b309",
+      "developmentSHA256": "5723e493a642bef1e4aab51f35e29202c92aeca2f1bb1a3f3fbdacb65b21b309",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/ais.ts",
+      "originalSHA256": "8230f8357287126b7afae2b5b53d29f5d9a5b60fa01ea7aa408ffd53312ba46e",
+      "developmentSHA256": "8230f8357287126b7afae2b5b53d29f5d9a5b60fa01ea7aa408ffd53312ba46e",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/anchor-alert.ts",
+      "originalSHA256": "2f4f7595d906f85dc4977fd92d647e3be69c805e572c1fe8f182654f0be45cb9",
+      "developmentSHA256": "fcfcf365b8169a1769b812320cf9af4f2f1b0353044442ca8ae7afdbac2c369a",
+      "unchanged": false
+    },
+    {
+      "path": "src/lib/app-data/app-data.test.ts",
+      "originalSHA256": "ec0c40fdaafb4e3d551086de9f9b4a745da7c252f7fbbc5c51a8b1b0a541391e",
+      "developmentSHA256": "ec0c40fdaafb4e3d551086de9f9b4a745da7c252f7fbbc5c51a8b1b0a541391e",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/app-data/client.server.ts",
+      "originalSHA256": "ab544af8b5b96e16248fdcf7ce634c132ccd3659c33cf0daa22f6e74ef5a5da0",
+      "developmentSHA256": "5f8891e6f2cbb5dc61ea77c49270de1036fb3b99afb7a47e55773bd157f21d1d",
+      "unchanged": false
+    },
+    {
+      "path": "src/lib/app-data/errors.ts",
+      "originalSHA256": "8e0dd8d761b2a5a1cafcb7523e2063151f0b6677837b19c3f6d494af148f3889",
+      "developmentSHA256": "8e0dd8d761b2a5a1cafcb7523e2063151f0b6677837b19c3f6d494af148f3889",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/app-data/index.ts",
+      "originalSHA256": "72cf57dc1a863f9693d34c11772ba4bae790cc17d9efb1e8619b8a2e6247a7fa",
+      "developmentSHA256": "72cf57dc1a863f9693d34c11772ba4bae790cc17d9efb1e8619b8a2e6247a7fa",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/app-data/login.ts",
+      "originalSHA256": "fbc723841bb67148dd9de12ed614ba6c095d799a533309857cc4d202d6be5ad9",
+      "developmentSHA256": "fbc723841bb67148dd9de12ed614ba6c095d799a533309857cc4d202d6be5ad9",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/app-data/readiness-schedule.test.ts",
+      "originalSHA256": "97c87401c474b9f87f2e21152fb377744f353736848f0044466ba2e260b06745",
+      "developmentSHA256": "97c87401c474b9f87f2e21152fb377744f353736848f0044466ba2e260b06745",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/app-data/readiness-schedule.ts",
+      "originalSHA256": "3ea7f192220446b08747f3ef76c7d2fe150356470621f2220738b23e7976f683",
+      "developmentSHA256": "3ea7f192220446b08747f3ef76c7d2fe150356470621f2220738b23e7976f683",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/app-data/readiness.ts",
+      "originalSHA256": "377786c1cf739eb9dc7c8b2bdcd09991686a700375a67a0c6e73b4334d394da1",
+      "developmentSHA256": "377786c1cf739eb9dc7c8b2bdcd09991686a700375a67a0c6e73b4334d394da1",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/app-data/server-only.ts",
+      "originalSHA256": "82821474088face6b9fcadad49793629e5f07a16386402b816262a1c070a3210",
+      "developmentSHA256": "82821474088face6b9fcadad49793629e5f07a16386402b816262a1c070a3210",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/app-data/types.ts",
+      "originalSHA256": "65f3c7566db12661ee9d3633eaae66a85505e00f57a61c258fa72bd22881489f",
+      "developmentSHA256": "65f3c7566db12661ee9d3633eaae66a85505e00f57a61c258fa72bd22881489f",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/app-data/use-connector-readiness.ts",
+      "originalSHA256": "57e6d2b3709be83ac2eed9c42eaa822a067fb5aa44a6098c982892c43f3a4f2f",
+      "developmentSHA256": "57e6d2b3709be83ac2eed9c42eaa822a067fb5aa44a6098c982892c43f3a4f2f",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth/client.ts",
+      "originalSHA256": "4bca649afb627b11231a7b31acfcffe9323efddebc05944b2d769d2b8589294f",
+      "developmentSHA256": "fb3e2df6fa1e7944afe8a193cd92979b33cc928081a1e0c8e3eb176ec7f3c517",
+      "unchanged": false
+    },
+    {
+      "path": "src/lib/auth/email-password.ts",
+      "originalSHA256": "9b1da7c786e48adfa9a6f7c485bcf5817cf2075a601d8726a965f11171910354",
+      "developmentSHA256": "9b1da7c786e48adfa9a6f7c485bcf5817cf2075a601d8726a965f11171910354",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth/gate-identity.server.ts",
+      "originalSHA256": "96546b8b6910a01163c36c34a0d417d803bec222b93304be764d810838764159",
+      "developmentSHA256": "96546b8b6910a01163c36c34a0d417d803bec222b93304be764d810838764159",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth/gate-identity.test.ts",
+      "originalSHA256": "21202fb2b56ffd10cb9b5bb7d9f305be88cce3902b858f73cea914df05ce2652",
+      "developmentSHA256": "21202fb2b56ffd10cb9b5bb7d9f305be88cce3902b858f73cea914df05ce2652",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth/gate-session-marker.ts",
+      "originalSHA256": "3dbf8cb789b0288f9d5c53b1515a3e87d265fcb22e11fe28dc3289c4bd7c06eb",
+      "developmentSHA256": "3dbf8cb789b0288f9d5c53b1515a3e87d265fcb22e11fe28dc3289c4bd7c06eb",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth/gate-session.server.ts",
+      "originalSHA256": "68aa500523ca2f0ad5c7ba34372c10aa1851a9774f8567c6b7781af5dd6cf204",
+      "developmentSHA256": "68aa500523ca2f0ad5c7ba34372c10aa1851a9774f8567c6b7781af5dd6cf204",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth/gates.tsx",
+      "originalSHA256": "39950c211bd4ad4f7129082bf5a43a42ff23975e681b99fd7cfbce372f83a5be",
+      "developmentSHA256": "39950c211bd4ad4f7129082bf5a43a42ff23975e681b99fd7cfbce372f83a5be",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth/isolation.server.ts",
+      "originalSHA256": "a4adf6a5d548e70a0be52d7efdc7433126028908072b47bf9f92135d9ee558a0",
+      "developmentSHA256": "a4adf6a5d548e70a0be52d7efdc7433126028908072b47bf9f92135d9ee558a0",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth/middleware.ts",
+      "originalSHA256": "8dc37c4e9bd583f175402330d0952ef4d584c7410723cc2649c4046d5084bd80",
+      "developmentSHA256": "8dc37c4e9bd583f175402330d0952ef4d584c7410723cc2649c4046d5084bd80",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth/pglite-dialect.ts",
+      "originalSHA256": "bd66925574245cd47cdd98b5c068dd7b4ee4a51c9439e8421dc54c62fe7c4f50",
+      "developmentSHA256": "bd66925574245cd47cdd98b5c068dd7b4ee4a51c9439e8421dc54c62fe7c4f50",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth/popup.server.ts",
+      "originalSHA256": "81f8833d9ab639f76b86f4bb23fed42a04cec4b0c6d90b7a67425a9232c9bb4a",
+      "developmentSHA256": "0312b44937c562092b6a5daf6dfe1ffab2fe893a3e209d79f234c70fe3e57228",
+      "unchanged": false
+    },
+    {
+      "path": "src/lib/auth/preview.ts",
+      "originalSHA256": "d52a3654a5cef7e841cbca789fd106dc464ea55db574f02aa5d295b7350f8664",
+      "developmentSHA256": "e822c8658ab94f56f205e55325e922e0e0731a88f0d51b8e382b2304e4187b74",
+      "unchanged": false
+    },
+    {
+      "path": "src/lib/auth/provider.tsx",
+      "originalSHA256": "4cbbc7f8cc1765788ad65455a33f64dcdafc6fe4ed1d13f90ccfa0ba4c13d1f3",
+      "developmentSHA256": "4cbbc7f8cc1765788ad65455a33f64dcdafc6fe4ed1d13f90ccfa0ba4c13d1f3",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth/providers.ts",
+      "originalSHA256": "4acefac17931529bdeab053588a917b06e44abdb67a275a2ca1c7841080c6a78",
+      "developmentSHA256": "4acefac17931529bdeab053588a917b06e44abdb67a275a2ca1c7841080c6a78",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth/server.ts",
+      "originalSHA256": "e0544cadbfa1a09c3cb4cf2a0ec187dbbb2831aebf7de887a3c858abdd72ca43",
+      "developmentSHA256": "e0544cadbfa1a09c3cb4cf2a0ec187dbbb2831aebf7de887a3c858abdd72ca43",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth/sign-in-gate.test.ts",
+      "originalSHA256": "2c352588cb6a8f58faf3aecc1d1f418ae827ddbb6a5eca8e56668ec72cd328d2",
+      "developmentSHA256": "2c352588cb6a8f58faf3aecc1d1f418ae827ddbb6a5eca8e56668ec72cd328d2",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth/sign-in-gate.ts",
+      "originalSHA256": "d2c65c20ab50ae41657ceecd61ded005fac29315deace9fc4d966cf56300754c",
+      "developmentSHA256": "d2c65c20ab50ae41657ceecd61ded005fac29315deace9fc4d966cf56300754c",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth/use-current-user.ts",
+      "originalSHA256": "6444e7a0e6b908ad47c73981d63552ec0d33225f24a6c63370b9cec8088442d6",
+      "developmentSHA256": "6444e7a0e6b908ad47c73981d63552ec0d33225f24a6c63370b9cec8088442d6",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth/verify.server.ts",
+      "originalSHA256": "42a7d5c1b17027ba004d6524a7f7bb4827b908d75ee3c3aefc940fa9c891c2ee",
+      "developmentSHA256": "42a7d5c1b17027ba004d6524a7f7bb4827b908d75ee3c3aefc940fa9c891c2ee",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/channel-marks.ts",
+      "originalSHA256": "d7dd6361335f620260345b63d8eaa3f42a813373aace05b566438d7717fe3e24",
+      "developmentSHA256": "d7dd6361335f620260345b63d8eaa3f42a813373aace05b566438d7717fe3e24",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/db.ts",
+      "originalSHA256": "8decf7689ff4833ad2f6f263eff9041dd2a68ce923824fa1d55ad620dea72e49",
+      "developmentSHA256": "8decf7689ff4833ad2f6f263eff9041dd2a68ce923824fa1d55ad620dea72e49",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/env.server.ts",
+      "originalSHA256": "9b834e0978ae76332a65a05f5bc75f80684db8c6aa638916869385c12e3343d5",
+      "developmentSHA256": "9b834e0978ae76332a65a05f5bc75f80684db8c6aa638916869385c12e3343d5",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/error-component.tsx",
+      "originalSHA256": "d219e4297409810a21bd382e60169faf69243d49dafd17cb0ea3a1888082b2f4",
+      "developmentSHA256": "d219e4297409810a21bd382e60169faf69243d49dafd17cb0ea3a1888082b2f4",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/multiplayer/index.ts",
+      "originalSHA256": "bcb96816a2135e315078e2e7d0eda5522579b0caf9e768dc6c34294e4fa49137",
+      "developmentSHA256": "bcb96816a2135e315078e2e7d0eda5522579b0caf9e768dc6c34294e4fa49137",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/multiplayer/p2p.ts",
+      "originalSHA256": "4d0d2492ac249a2cf267c8d2db7688b5a2c488ab640da7727c0f1b73c2e92f60",
+      "developmentSHA256": "4d0d2492ac249a2cf267c8d2db7688b5a2c488ab640da7727c0f1b73c2e92f60",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/navtex.ts",
+      "originalSHA256": "3bfbc4302842e8f47350e1d14c5842b52e36de68affb0d64dd4b65502ec9df11",
+      "developmentSHA256": "3bfbc4302842e8f47350e1d14c5842b52e36de68affb0d64dd4b65502ec9df11",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/nmea.ts",
+      "originalSHA256": "b85362297ebd15b7ed451979ea878ab5709bf5aed9181d2ba677e4f6673f63f3",
+      "developmentSHA256": "b85362297ebd15b7ed451979ea878ab5709bf5aed9181d2ba677e4f6673f63f3",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/og/site.json",
+      "originalSHA256": "6112e68caf054017edd9703a09f3a424c875ee31b1ffdeebe492bf87ea9334a9",
+      "developmentSHA256": "6112e68caf054017edd9703a09f3a424c875ee31b1ffdeebe492bf87ea9334a9",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/preview-embedder-origin.ts",
+      "originalSHA256": "c2d5e1acc5653ff2abc08a5eeb5feb3331f4e3d7c751ec83d60dee83cf33a6ee",
+      "developmentSHA256": "c2d5e1acc5653ff2abc08a5eeb5feb3331f4e3d7c751ec83d60dee83cf33a6ee",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/preview-host-bridge.ts",
+      "originalSHA256": "63a91311378037680b6be414937295069ec2950520d1dc959741cf430ba6b38b",
+      "developmentSHA256": "63a91311378037680b6be414937295069ec2950520d1dc959741cf430ba6b38b",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/preview-path-prefix.test.ts",
+      "originalSHA256": "08da80da191446ed449da9a1180ccaaeebb8eaf295bf3ef9f0a5fcca51860ce1",
+      "developmentSHA256": "08da80da191446ed449da9a1180ccaaeebb8eaf295bf3ef9f0a5fcca51860ce1",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/preview-path-prefix.ts",
+      "originalSHA256": "d46d4c21d47c2765198352b649037def35371c3995525cc42f5aff6a0f1519b7",
+      "developmentSHA256": "d46d4c21d47c2765198352b649037def35371c3995525cc42f5aff6a0f1519b7",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/survey.ts",
+      "originalSHA256": "bc18afa010fc69bdb8579c5d58915129a896d63c5352c036cf261f0ca1d055d3",
+      "developmentSHA256": "bc18afa010fc69bdb8579c5d58915129a896d63c5352c036cf261f0ca1d055d3",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/tide.ts",
+      "originalSHA256": "41af051f8098803aedf3363be0306a9e22ecb289ace841e4ee2b33bab0e32305",
+      "developmentSHA256": "41af051f8098803aedf3363be0306a9e22ecb289ace841e4ee2b33bab0e32305",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/umm-tide.ts",
+      "originalSHA256": "96f64a652b95da8f9d992ef2231a68d19f94223794701f0ffb972450fa879b10",
+      "developmentSHA256": "96f64a652b95da8f9d992ef2231a68d19f94223794701f0ffb972450fa879b10",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/weather.ts",
+      "originalSHA256": "83f8c44d93cf18d42b9d836724863415a1406ff8c7561f729fb8e166bcdff267",
+      "developmentSHA256": "83f8c44d93cf18d42b9d836724863415a1406ff8c7561f729fb8e166bcdff267",
+      "unchanged": true
+    },
+    {
+      "path": "src/router.tsx",
+      "originalSHA256": "0b72f2ad19d5a6e60d1e699d2fe0e4c0a2fa00d88881314e51a0e79fb1541611",
+      "developmentSHA256": "0b72f2ad19d5a6e60d1e699d2fe0e4c0a2fa00d88881314e51a0e79fb1541611",
+      "unchanged": true
+    },
+    {
+      "path": "src/routes/__root.tsx",
+      "originalSHA256": "700a77e3002bac4fd08a9d4c6bacd81176c261cd15fe35c90e7459be2e540e98",
+      "developmentSHA256": "700a77e3002bac4fd08a9d4c6bacd81176c261cd15fe35c90e7459be2e540e98",
+      "unchanged": true
+    },
+    {
+      "path": "src/routes/index.tsx",
+      "originalSHA256": "72f2c1363cacf6aca6f9ccc6b6d943e3f7c4e48943e9048b4dc740839f2ddf7b",
+      "developmentSHA256": "72f2c1363cacf6aca6f9ccc6b6d943e3f7c4e48943e9048b4dc740839f2ddf7b",
+      "unchanged": true
+    },
+    {
+      "path": "src/routeTree.gen.ts",
+      "originalSHA256": "f4a843c61899ede2abbc4a7153e6a00557765f737b724b152463c533c4e0ddb0",
+      "developmentSHA256": "f4a843c61899ede2abbc4a7153e6a00557765f737b724b152463c533c4e0ddb0",
+      "unchanged": true
+    },
+    {
+      "path": "src/styles.css",
+      "originalSHA256": "2b988e0490f41329809f97730e00f6db551602ebc61c0707985c194a641eb8f5",
+      "developmentSHA256": "2b988e0490f41329809f97730e00f6db551602ebc61c0707985c194a641eb8f5",
+      "unchanged": true
+    },
+    {
+      "path": "public/__grok/icon-180.png",
+      "originalSHA256": "3cf5d17d294b51c6cca6c86070309b88554b7ad702b0412e8e2709a01990bc8a",
+      "developmentSHA256": "3cf5d17d294b51c6cca6c86070309b88554b7ad702b0412e8e2709a01990bc8a",
+      "unchanged": true
+    },
+    {
+      "path": "public/__grok/install/assets/homescreen/glass-puzzle.svg",
+      "originalSHA256": "a677c9356c23d1e699559ddbffac97cd135c2782cd893fb34f3738f6d11bee17",
+      "developmentSHA256": "a677c9356c23d1e699559ddbffac97cd135c2782cd893fb34f3738f6d11bee17",
+      "unchanged": true
+    },
+    {
+      "path": "public/__grok/install/assets/homescreen/glass-share.svg",
+      "originalSHA256": "efad1b4b507a68c1f1af4aad2c93e8c24076224aa593da86677697f543d026d6",
+      "developmentSHA256": "efad1b4b507a68c1f1af4aad2c93e8c24076224aa593da86677697f543d026d6",
+      "unchanged": true
+    },
+    {
+      "path": "public/__grok/install/assets/homescreen/logo-grok.svg",
+      "originalSHA256": "0654e3e59cce69856f38525cbfe4ab3a9ef52d4b64c8532dd0bc1a3f34fcb5b1",
+      "developmentSHA256": "0654e3e59cce69856f38525cbfe4ab3a9ef52d4b64c8532dd0bc1a3f34fcb5b1",
+      "unchanged": true
+    },
+    {
+      "path": "public/__grok/install/assets/homescreen/ob-ipad.png",
+      "originalSHA256": "4c9b09a4660c662b394597d551a04124293b0e37a7a7c72271dd2948c4499a14",
+      "developmentSHA256": "4c9b09a4660c662b394597d551a04124293b0e37a7a7c72271dd2948c4499a14",
+      "unchanged": true
+    },
+    {
+      "path": "public/__grok/install/assets/homescreen/ob-phone.png",
+      "originalSHA256": "80e0a5ede614d9b920c67d7cb79c80a79134687b1fc9f560384e896a88e302db",
+      "developmentSHA256": "80e0a5ede614d9b920c67d7cb79c80a79134687b1fc9f560384e896a88e302db",
+      "unchanged": true
+    },
+    {
+      "path": "public/__grok/install/assets/homescreen/plus.svg",
+      "originalSHA256": "c2c94be46aa2c3c2fda95d7c6f2fc6d0b656d1f5847828d5d95b5a81a6f4f20d",
+      "developmentSHA256": "c2c94be46aa2c3c2fda95d7c6f2fc6d0b656d1f5847828d5d95b5a81a6f4f20d",
+      "unchanged": true
+    },
+    {
+      "path": "public/__grok/install/styles.css",
+      "originalSHA256": "7e8e881302f58e54a9c07e7be395692d3de20fdaa27ce358531cc8dcca472cb6",
+      "developmentSHA256": "7e8e881302f58e54a9c07e7be395692d3de20fdaa27ce358531cc8dcca472cb6",
+      "unchanged": true
+    },
+    {
+      "path": "public/favicon.svg",
+      "originalSHA256": "c4d8ba29dbeb61e12c18de081bd8f4bba7373ce772f2e8d168ab73645f154d7a",
+      "developmentSHA256": "c4d8ba29dbeb61e12c18de081bd8f4bba7373ce772f2e8d168ab73645f154d7a",
+      "unchanged": true
+    },
+    {
+      "path": "public/gcpi-seal.png",
+      "originalSHA256": "3c593b7490772166cadc8bbae36e95efdc844900a665e4fad92b7441351e7f8b",
+      "developmentSHA256": "3c593b7490772166cadc8bbae36e95efdc844900a665e4fad92b7441351e7f8b",
+      "unchanged": true
+    },
+    {
+      "path": "public/marine-360.png",
+      "originalSHA256": "39df510ca80c2789a3092c1b568394e4f5b84b20fe890e4f3c9cd300c33bfb38",
+      "developmentSHA256": "39df510ca80c2789a3092c1b568394e4f5b84b20fe890e4f3c9cd300c33bfb38",
+      "unchanged": true
+    },
+    {
+      "path": "public/survey-river.json",
+      "originalSHA256": "6977eeb60fccf005036b66f0ebbe7abde99152b8ac29baafb9c821728bd61974",
+      "developmentSHA256": "6977eeb60fccf005036b66f0ebbe7abde99152b8ac29baafb9c821728bd61974",
+      "unchanged": true
+    },
+    {
+      "path": "public/survey.json",
+      "originalSHA256": "1e77e395351dccd62f7c6507e5fdf9e096c4642952453e70637fe2fcf2652181",
+      "developmentSHA256": "1e77e395351dccd62f7c6507e5fdf9e096c4642952453e70637fe2fcf2652181",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/app-env-plugin.mjs",
+      "originalSHA256": "92962d2361a98413c0cef80b31266d49b063cf4ecf6421bb99f57f6eef4ed7b6",
+      "developmentSHA256": "92962d2361a98413c0cef80b31266d49b063cf4ecf6421bb99f57f6eef4ed7b6",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/brand-check.mjs",
+      "originalSHA256": "318f33ce7b29b55c386cc8847084068777880f795a5082043229bb06686be035",
+      "developmentSHA256": "318f33ce7b29b55c386cc8847084068777880f795a5082043229bb06686be035",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/brand-check.test.mjs",
+      "originalSHA256": "3dada9e907cf63d4127588268f38987e72108639e65a2694aebf4ee35aa9f309",
+      "developmentSHA256": "802ac7857518b485dbdf2c2403f2533288eacf95d62e0ca88c9c9dd92b7bc2b3",
+      "unchanged": false
+    },
+    {
+      "path": "scripts/browser-guard.mjs",
+      "originalSHA256": "c6fb865defe5a37bd94e3805b00311d4e8267daf92812e39f62b1213d947265e",
+      "developmentSHA256": "c6fb865defe5a37bd94e3805b00311d4e8267daf92812e39f62b1213d947265e",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/browser-smoke-verdict.mjs",
+      "originalSHA256": "5699614f7fa62515e25ba9cca6397db2770cf6feb9b973f3c19f2915874c53de",
+      "developmentSHA256": "5699614f7fa62515e25ba9cca6397db2770cf6feb9b973f3c19f2915874c53de",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/browser-smoke-verdict.test.mjs",
+      "originalSHA256": "48b3924b41d606f94a9b8faae47ff350b84978fdd5ab3f6ca01640ed4c7087d7",
+      "developmentSHA256": "48b3924b41d606f94a9b8faae47ff350b84978fdd5ab3f6ca01640ed4c7087d7",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/browser-smoke.mjs",
+      "originalSHA256": "2e1cc3136f33bd74b73b4b3dba812e74ac299c24893b9a7c406e9bbeaf46571f",
+      "developmentSHA256": "2e1cc3136f33bd74b73b4b3dba812e74ac299c24893b9a7c406e9bbeaf46571f",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/check-auth-invariant.mjs",
+      "originalSHA256": "d712203c4bc92c197c342e5c91660fc5a141a31171f22f35c505a0bff45f98ee",
+      "developmentSHA256": "d712203c4bc92c197c342e5c91660fc5a141a31171f22f35c505a0bff45f98ee",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/check-auth-invariant.test.mjs",
+      "originalSHA256": "75a58f44dffb2fc77eb47473638646f607dba26a68a6900156031c7b6227cf3c",
+      "developmentSHA256": "64f9d5e230564821a1cfa7ba9d8e429ad1fede331b22fa4bcd4c434c5f93ec1d",
+      "unchanged": false
+    },
+    {
+      "path": "scripts/grok-pwa-plugin.mjs",
+      "originalSHA256": "36331d0bc0664debb5068bd6869d3089dc41555b7770c9ccb577d8845958835c",
+      "developmentSHA256": "36331d0bc0664debb5068bd6869d3089dc41555b7770c9ccb577d8845958835c",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/grok-pwa-plugin.test.mjs",
+      "originalSHA256": "816c6b867c7230d739f69598202c0903e4332632293d548bde74c8d875ed8e5c",
+      "developmentSHA256": "b411db995efa6bb38134be16849ef1dd9cfa8f3ee5212a877c87b3ddd4efa3ed",
+      "unchanged": false
+    },
+    {
+      "path": "scripts/grok-pwa-shared.d.mts",
+      "originalSHA256": "f4db33fcf35ef3f25fca05d1b42494b6f607c44a4d728ed3e989e65a3a1ea9d0",
+      "developmentSHA256": "f4db33fcf35ef3f25fca05d1b42494b6f607c44a4d728ed3e989e65a3a1ea9d0",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/grok-pwa-shared.mjs",
+      "originalSHA256": "99bf3caab5e4c2a30fe748a196cfa4074a9e039efec16f57c83efe325bcadd9e",
+      "developmentSHA256": "99bf3caab5e4c2a30fe748a196cfa4074a9e039efec16f57c83efe325bcadd9e",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/install-page.html",
+      "originalSHA256": "5f8fe91f837db8d74d68db5e057948918bd9299e097700e0bd18f1cf5f94e586",
+      "developmentSHA256": "5f8fe91f837db8d74d68db5e057948918bd9299e097700e0bd18f1cf5f94e586",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/migrate.mjs",
+      "originalSHA256": "e1a31c8046a099df37b4bcbcafa4f4f7d7d18b1f1f0dc6d79676d41c4be976be",
+      "developmentSHA256": "e1a31c8046a099df37b4bcbcafa4f4f7d7d18b1f1f0dc6d79676d41c4be976be",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/migration-plan.mjs",
+      "originalSHA256": "9305d8cfe8cdad73671065d675c89d0f20075d18c756f9aba5043b72e7c19a0d",
+      "developmentSHA256": "9305d8cfe8cdad73671065d675c89d0f20075d18c756f9aba5043b72e7c19a0d",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/migration-plan.test.mjs",
+      "originalSHA256": "9787b5f5f1a7057db94f0a5a8c89abf6ec569fd22d26f99be1c248a2a9f0c082",
+      "developmentSHA256": "9787b5f5f1a7057db94f0a5a8c89abf6ec569fd22d26f99be1c248a2a9f0c082",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/preview-thumbnail.mjs",
+      "originalSHA256": "fd7263a1dd76f788c2b51e9381e1f1de1a58993fd94e01040285556cd38c0c40",
+      "developmentSHA256": "fd7263a1dd76f788c2b51e9381e1f1de1a58993fd94e01040285556cd38c0c40",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/preview.mjs",
+      "originalSHA256": "b366b1c28844cda81d21e36a88af5f548bdec6a5a4b3000aac12be3ec99cf605",
+      "developmentSHA256": "b366b1c28844cda81d21e36a88af5f548bdec6a5a4b3000aac12be3ec99cf605",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/preview.test.mjs",
+      "originalSHA256": "0105fe41d056ecc22c586a191a9cbd7d0e838b7c878d6993c8c9573c7ea708b1",
+      "developmentSHA256": "0105fe41d056ecc22c586a191a9cbd7d0e838b7c878d6993c8c9573c7ea708b1",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/sign-out-plan.mjs",
+      "originalSHA256": "32ae072de23b5138bf849c344caf72ab2dab6cb4617ab9915db4e4f5b9c7e2f0",
+      "developmentSHA256": "32ae072de23b5138bf849c344caf72ab2dab6cb4617ab9915db4e4f5b9c7e2f0",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/sign-out-plan.test.mjs",
+      "originalSHA256": "1942e32f4b6a9d8b62733338b0f0e1a7d84ed278b4e6c4f24fa7616a3abc694e",
+      "developmentSHA256": "1942e32f4b6a9d8b62733338b0f0e1a7d84ed278b4e6c4f24fa7616a3abc694e",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/with-app-env.mjs",
+      "originalSHA256": "a846b68bd3645299c23eef965d9ef226df3a500d345d7576c23f7a2b2ff643c7",
+      "developmentSHA256": "7917c20829ae49ea6a55bdb69665243ea4d7b6660b61d6296f70ae34cabbbd5a",
+      "unchanged": false
+    },
+    {
+      "path": "scripts/with-app-env.test.mjs",
+      "originalSHA256": "384ea7d0d20f980f733ee38d8f48b0bedd8a4ad39c80ca4792b9aeebcb275851",
+      "developmentSHA256": "9c74ecd107b50e2470d90f7117ffabd28bdeeceacd46b19542e7d1caaafca5ce",
+      "unchanged": false
+    },
+    {
+      "path": "scripts/write-atomic.mjs",
+      "originalSHA256": "650b62e8aa38697e1b931049025afe3aac829e6761a8aadf428712faef8b1544",
+      "developmentSHA256": "650b62e8aa38697e1b931049025afe3aac829e6761a8aadf428712faef8b1544",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/write-atomic.test.mjs",
+      "originalSHA256": "e266ac99149651c368715317820934f0e8942db0fc763725ca4a096bf169ad3b",
+      "developmentSHA256": "17a9149206841104ae683b691d269344cba11d5511944131987c3ad3cc086dd2",
+      "unchanged": false
+    },
+    {
+      "path": "server/middleware/grok-pwa.ts",
+      "originalSHA256": "340f1fed44355a61fefdaf29a752c524ac029afb00bea3f40cc996cdb289d2f8",
+      "developmentSHA256": "340f1fed44355a61fefdaf29a752c524ac029afb00bea3f40cc996cdb289d2f8",
+      "unchanged": true
+    },
+    {
+      "path": "server/virtual-grok-og-identity.d.ts",
+      "originalSHA256": "74847f2b2bade154ac07dabb239c4718a745c095df530e78b8f1ef9f053edfa2",
+      "developmentSHA256": "74847f2b2bade154ac07dabb239c4718a745c095df530e78b8f1ef9f053edfa2",
+      "unchanged": true
+    },
+    {
+      "path": "migrations/auth/0001_auth.sql",
+      "originalSHA256": "f953cacc448c0c81ae4fe63e66b0e59569e840782ad279fdee201dff529363e9",
+      "developmentSHA256": "f953cacc448c0c81ae4fe63e66b0e59569e840782ad279fdee201dff529363e9",
+      "unchanged": true
+    },
+    {
+      "path": "package.json",
+      "originalSHA256": "39b1ef0c86e3147e0e0bcff895e68480013ebce504a9a1030ab2b6ab9817e9b2",
+      "developmentSHA256": "45838bb4ecfceb279b564a7ef88d74b5e562223239af575d066b9ea8d1db51ba",
+      "unchanged": false
+    },
+    {
+      "path": "package-lock.json",
+      "originalSHA256": "57d176a0a0113f340372de678933a530de0b400a4768d1ab91a7771b1d7239ed",
+      "developmentSHA256": "cf1a543a28ad2da98e1dbd1bf02f772920fc33d0ac4107a390529576a49cbb2f",
+      "unchanged": false
+    },
+    {
+      "path": "tsconfig.json",
+      "originalSHA256": "8abad87a6c62322f1f4fdff02d5f3f764ea10a98c49cfafccdc288a0dced492f",
+      "developmentSHA256": "8abad87a6c62322f1f4fdff02d5f3f764ea10a98c49cfafccdc288a0dced492f",
+      "unchanged": true
+    },
+    {
+      "path": "vite.config.ts",
+      "originalSHA256": "5451c22b17e7d8408674909b3d231f0ae4a4d017b740491ce7df008d961a7eee",
+      "developmentSHA256": "5451c22b17e7d8408674909b3d231f0ae4a4d017b740491ce7df008d961a7eee",
+      "unchanged": true
+    },
+    {
+      "path": "eslint.config.mjs",
+      "originalSHA256": "9c79df07c33ff6aa13876bdd1e7e6652aa1ecb377c7b7f029f7915d215ee4488",
+      "developmentSHA256": "6c665be5f72bb9ca62da7d1dfbd302cac2f8d32bec6805746fa7e0baf2c1c5d6",
+      "unchanged": false
+    },
+    {
+      "path": ".prettierrc",
+      "originalSHA256": "d5f90f76c5b68ce7be5ba077813f97e1983511b8c314764537345a538c1261f4",
+      "developmentSHA256": "d5f90f76c5b68ce7be5ba077813f97e1983511b8c314764537345a538c1261f4",
+      "unchanged": true
+    },
+    {
+      "path": "vercel.json",
+      "originalSHA256": "b621d84931055b57a73e6d4547ab4b161b6bfbf091806354d3f6f67d0f57700f",
+      "developmentSHA256": "b621d84931055b57a73e6d4547ab4b161b6bfbf091806354d3f6f67d0f57700f",
+      "unchanged": true
+    },
+    {
+      "path": ".grok/app-env.json",
+      "originalSHA256": "62dea7bb1344fbbdca7057eea06791c27b1488f25203d25bcfd8035c44280151",
+      "developmentSHA256": "62dea7bb1344fbbdca7057eea06791c27b1488f25203d25bcfd8035c44280151",
+      "unchanged": true
+    }
+  ]
+}
