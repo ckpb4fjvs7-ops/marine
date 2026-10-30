@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: marine360
+    runtime: node
+    plan: free
+    branch: main
+    buildCommand: npm ci && npm run build:render
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NITRO_HOST
+        value: 0.0.0.0
+      - key: VITE_AUTH_ENABLED
+        value: "false"

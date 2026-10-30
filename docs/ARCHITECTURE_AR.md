@@ -2,7 +2,7 @@
 
 ## التقنيات الحالية
 
-React 19، TypeScript، TanStack Start/Router، Vite 8، Tailwind CSS 4، Leaflet مع تدوير الخريطة، وThree.js للمجسم. ناتج الإنتاج يستخدم Nitro مع إعداد Vercel الموجود في الأصل. لا يوجد نقل إلى منصة نشر جديدة.
+React 19، TypeScript، TanStack Start/Router، Vite 8، Tailwind CSS 4، Leaflet مع تدوير الخريطة، وThree.js للمجسم. ناتج الإنتاج يستخدم Nitro؛ البناء العادي يبقي إعداد Vercel، و`build:render` ينتج خادم Node.js مستقلًا لـRender.
 
 ## الوحدات
 

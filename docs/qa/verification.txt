@@ -49,3 +49,12 @@ Build: PASS
 Secret patterns in tracked source: none found
 .env.local, node_modules, generated build output and test-results: excluded from Git
 Legacy preview credential moved to server environment only
+
+Render Node server preparation — 2026-10-30
+TypeScript: PASS
+Node tests: 265 passed, 0 failed
+build:render: PASS; standalone .output/server/index.mjs produced
+npm start equivalent with PORT from environment: PASS
+Standalone Node UI: desktop 8 scenario groups + mobile 8 groups, PASS
+Page, survey JSON and PWA manifest: HTTP 200
+No navigation calculations or survey data changed

@@ -27,6 +27,8 @@ npm run dev
 | `npm test` | اختبارات المشروع واختبارات الملاحة، دون إرسال تنبيهات خارجية |
 | `npm run test:navigation` | اختبارات الحسابات وNMEA وAIS وبيانات المسح والمدّ |
 | `npm run build` | إنشاء نسخة إنتاج، دون تشغيل ترحيلات قاعدة البيانات |
+| `npm run build:render` | بناء خادم Node.js مستقل لـRender داخل `.output/` |
+| `npm start` | تشغيل خادم Render بعد بنائه، مع قراءة إعدادات التطبيق المحلية أو الخادمية |
 | `npm run preview` | عرض البناء على `http://127.0.0.1:8081/` |
 | `npm run test:ui` | اختبار الواجهة على خادم التطوير المشغّل مسبقًا |
 | `npm run test:ui -- http://127.0.0.1:8081/` | اختبار واجهة البناء المشغّل مسبقًا |
@@ -60,3 +62,13 @@ TELEGRAM_CHAT_ID=your_chat_id
 الأرشيف الأصلي لم يُعدّل. الملفات التاريخية، والمرفقات، ونسخ THIQAR المتداخلة، ومخرجات البناء القديمة لم تُخلط مع مصدر التطوير. مراجع Grok اللازمة لاختبارات القالب محفوظة تحت `tests/fixtures/upstream/` كبيانات اختبار، وليست تعليمات تشغيل لهذا المشروع.
 
 إعداد مصادقة Grok التجريبي الموروث، إذا لزم تفعيله مستقبلًا، يقرأ `GROK_PREVIEW_CLIENT_SECRET` من البيئة الخادمية. لا توجد قيمته داخل الشيفرة؛ المصادقة تبقى متوقفة افتراضيًا.
+
+## النشر على Render
+
+اختر **Web Service** وخطة **Free**، والمستودع `ckpb4fjvs7-ops/marine` والفرع `main`. اترك Root Directory فارغًا، واضبط Build Command على `npm ci && npm run build:render` وStart Command على `npm start`. يوجد `render.yaml` بالإعدادات نفسها للاستخدام مع Blueprints. المشروع يحدد Node.js 24 عبر `.nvmrc` و`engines`.
+
+اضبط `NITRO_HOST=0.0.0.0`، واترك Render يحدد `PORT` تلقائيًا. اضبط `VITE_AUTH_ENABLED=false` للاحتفاظ بوضع الملاحة الحالي. مفاتيح Telegram اختيارية وتوضع في Environment Variables على الخادم. لا تلزم قاعدة بيانات للوظائف الحالية.
+
+البناء العادي `npm run build` يبقي إعداد Vercel متاحًا. البناء `build:render` ينتج `.output/server/index.mjs` وموارد الموقع في `.output/public/`. شغّل خادم Node كاملًا حتى تعمل وظائف AIS والمدّ وNAVTEX والتنبيهات الخادمية.
+
+خطة Render المجانية تتوقف بعد 15 دقيقة بلا زيارات، وقد تحتاج نحو دقيقة للاستيقاظ؛ هذا النشر مخصص للتجربة. [حدود الخطة الرسمية](https://render.com/docs/free).

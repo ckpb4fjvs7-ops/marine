@@ -637,7 +637,7 @@
     {
       "path": "package.json",
       "originalSHA256": "39b1ef0c86e3147e0e0bcff895e68480013ebce504a9a1030ab2b6ab9817e9b2",
-      "developmentSHA256": "45838bb4ecfceb279b564a7ef88d74b5e562223239af575d066b9ea8d1db51ba",
+      "developmentSHA256": "f8ac1bb882d72c2456ac4d457dfc88b1afb77824faf46083a9601c56ebb80b3b",
       "unchanged": false
     },
     {
@@ -655,8 +655,8 @@
     {
       "path": "vite.config.ts",
       "originalSHA256": "5451c22b17e7d8408674909b3d231f0ae4a4d017b740491ce7df008d961a7eee",
-      "developmentSHA256": "5451c22b17e7d8408674909b3d231f0ae4a4d017b740491ce7df008d961a7eee",
-      "unchanged": true
+      "developmentSHA256": "fe5b20646caaeac73181c0b37bd77c5bba68da8884263dfac5ee97f40884fa13",
+      "unchanged": false
     },
     {
       "path": "eslint.config.mjs",
