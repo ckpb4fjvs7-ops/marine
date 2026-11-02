@@ -161,6 +161,35 @@ select option {
   align-items: flex-start;
 }
 
+.ecdis-ribbon__commands:has(.settings-panel) {
+  max-height: min(28rem, 48dvh);
+  align-items: stretch;
+}
+
+.ecdis-ribbon__commands:has(.network-udp-panel) {
+  max-height: min(36rem, 52dvh);
+  align-items: flex-start;
+}
+
+.network-udp-panel {
+  flex: 1 0 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.settings-panel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  flex: 1 0 100%;
+  min-width: 0;
+  gap: 0.75rem;
+  padding-block: 0.25rem;
+}
+
+.settings-panel > div:last-child {
+  grid-column: 1 / -1;
+}
+
 .wp-table {
   flex: 1 0 100%;
   max-width: 36rem;
@@ -175,6 +204,10 @@ select option {
 }
 
 @media (width <= 820px) {
+  .settings-panel {
+    grid-template-columns: 1fr;
+  }
+
   aside.side-slot.w-72 {
     position: absolute;
     top: 0;
@@ -212,6 +245,30 @@ select option {
   filter: drop-shadow(0 1px 2px rgb(0 0 0 / 70%));
 }
 
+.ship-pin .ship-rot > svg {
+  transform: scale(var(--ship-scale, 1));
+  transform-origin: center;
+}
+
+.leaflet-container .speed-vector-tip {
+  background: none;
+  border: none;
+}
+
+.leaflet-tooltip.speed-vector-label {
+  border: 1px solid #22c979;
+  background: rgb(7 20 28 / 92%);
+  color: #c0f9d9;
+  font-size: 11px;
+  font-weight: 600;
+  direction: ltr;
+  pointer-events: none;
+}
+
+.leaflet-tooltip.speed-vector-label::before {
+  display: none;
+}
+
 .ship-fix {
   position: absolute;
   left: 24px;
@@ -236,6 +293,29 @@ select option {
   font-size: 12px;
   line-height: 1.4;
   white-space: nowrap;
+}
+
+.leaflet-tooltip.kmz-depth-label,
+.leaflet-tooltip.kmz-contour-label {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  text-shadow: 0 1px 2px #000, 1px 0 2px #000;
+  pointer-events: none;
+}
+
+.leaflet-tooltip.kmz-contour-label {
+  font-size: 24px;
+}
+
+.leaflet-container:not(.kmz-labels-visible) .kmz-depth-label,
+.leaflet-container:not(.kmz-labels-visible) .kmz-contour-label {
+  display: none;
 }
 
 .daymark {

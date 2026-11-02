@@ -1,3 +1,5 @@
+export type SurveySounding = { lng: number; lat: number; depth: number; label: string };
+
 export type Survey = {
   name: string;
   lon0: number;
@@ -18,6 +20,8 @@ export type Survey = {
   maxDepth: number;
   pointCount: number;
   depths: (number | null)[];
+  /** Original irregular measurements, without gridding, averaging or gap filling. */
+  soundings?: SurveySounding[];
 };
 
 export type Sample = {
@@ -85,6 +89,18 @@ export function unproject(survey: Survey, x: number, y: number): { lat: number; 
 /** Nearest surveyed cell. Returns null when the click is off the survey tracks. */
 export function sampleAt(survey: Survey, lat: number, lng: number): Sample {
   const { x, y } = project(survey, lat, lng);
+  if (survey.soundings) {
+    let nearest: SurveySounding | null = null;
+    let distance = Infinity;
+    for (const point of survey.soundings) {
+      const dx = (point.lng - lng) * survey.mPerLon;
+      const dy = (point.lat - lat) * survey.mPerLat;
+      const squared = dx * dx + dy * dy;
+      if (squared < distance) { nearest = point; distance = squared; }
+    }
+    // Report an existing measurement within 10 m, never an invented/interpolated depth.
+    return { depth: nearest && distance <= 100 ? nearest.depth : null, x, y };
+  }
   const fi = (x - survey.x0) / survey.dx;
   const fj = (y - survey.y0) / survey.dy;
   const i0 = Math.round(fi);
@@ -210,6 +226,7 @@ function diskOffsets(radius: number): Array<[number, number]> {
 
 /** Close gaps inside a surveyed channel. Measured cells stay exact. */
 export function completeChannel(survey: Survey, radius = CHANNEL_RADIUS): Survey {
+  if (survey.soundings) return survey;
   const { nx, ny, depths } = survey;
   const offsets = diskOffsets(radius);
   const mask = new Uint8Array(nx * ny);

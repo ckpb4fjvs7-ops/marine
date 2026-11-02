@@ -24,6 +24,7 @@
     "build:deploy": "npm run build && npm run db:migrate",
     "test:navigation": "node --experimental-strip-types --test tests/navigation.test.ts",
     "test:ui": "node scripts/navigation-smoke.mjs",
+    "network:bridge": "node --experimental-strip-types scripts/udp-bridge.mjs",
     "check": "npm run typecheck && npm run lint && npm test && npm run build"
   },
   "dependencies": {

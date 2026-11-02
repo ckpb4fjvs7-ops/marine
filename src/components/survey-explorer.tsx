@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import type L from "leaflet";
 import type * as THREE from "three";
 import { LocateFixed, Map as MapIcon, Box, Crosshair, Cable, Bluetooth, Flag, Moon, Sun, Move, Cloud, Wind, Waves, RefreshCw, X, Compass, Radio, Ship, LayoutGrid, Clock } from "lucide-react";
@@ -13,7 +13,14 @@ import { ScrollFade } from "@animate-ui/react/primitives/effects/scroll-fade";
 import { StartupSplash } from "@/components/startup-splash";
 import { NavtexPanel } from "@/components/navtex-panel";
 import { MarineClock } from "@/components/marine-clock";
+import { DisplaySettingsPanel } from "@/components/display-settings-panel";
+import { NetworkUdpPanel } from "@/components/network-udp-panel";
+import { useNetworkUdp } from "@/lib/use-network-udp";
+import { DEFAULT_DISPLAY_SETTINGS, DISPLAY_SETTINGS_KEY, normalizeDisplaySettings, parseDisplaySettings, type DisplaySettings } from "@/lib/display-settings";
+import { calculateSpeedVector, SPEED_VECTOR_MINUTES, type SpeedVectorResult, type VectorTelemetry } from "@/lib/speed-vector";
+import { renderSpeedVector, type SpeedVectorLayer } from "@/lib/speed-vector-layer";
 import { CHANNEL_MARKS, type ChannelMark } from "@/lib/channel-marks";
+import { ABDULLAH_SURVEY_NAME, ABDULLAH_KML_URL, ABDULLAH_KMZ_URL, parseSurveyKml, createKmlDepthLayer, setKmlDepthOpacity } from "@/lib/kml-survey";
 import {
   LEGEND,
   completeChannel,
@@ -104,6 +111,7 @@ function standaloneHref(): string {
 type Hit = { lat: number; lng: number; depth: number | null };
 type WpRow = { id: number; lat: string; lng: string; ns: "N" | "S"; ew: "E" | "W" };
 type ViewMode = "map" | "model" | "both";
+type DepthMapKey = "gas" | "river" | "abdullah";
 type PlanPoint = { lat: number; lng: number };
 type WeatherLocationMode = "port" | "ship";
 const UMM_QASR_PORT = { lat: 30 + 2 / 60, lng: 47 + 57 / 60 };
@@ -313,8 +321,15 @@ export function SurveyExplorer() {
   const destMarkerRef = useRef<L.Marker | null>(null);
   const routeRef = useRef<L.Polyline | null>(null);
   const trackPtsRef = useRef<Array<[number, number]>>([]);
+  const drawTrackRef = useRef<() => void>(() => {});
+  const pushTrackRef = useRef<(lat: number, lng: number) => void>(() => {});
+  const displaySettingsRef = useRef<DisplaySettings>(DEFAULT_DISPLAY_SETTINGS);
   const trackLineRef = useRef<L.Polyline | null>(null);
   const courseLineRef = useRef<L.Polyline | null>(null);
+  const speedVectorLayerRef = useRef<SpeedVectorLayer | null>(null);
+  const vectorTelemetryRef = useRef<VectorTelemetry>({ position: null, motion: null });
+  const drawSpeedVectorRef = useRef<() => void>(() => {});
+  const clearSpeedVectorRef = useRef<() => void>(() => {});
   const vrmCircleRef = useRef<L.Circle | null>(null);
   const eblLineRef = useRef<L.Polyline | null>(null);
   const vrmOnRef = useRef(false);
@@ -360,10 +375,11 @@ export function SurveyExplorer() {
   const surveyRef = useRef<Survey | null>(null);
   const surveysRef = useRef<Survey[]>([]);
   const depthLayersRef = useRef<L.ImageOverlay[]>([]);
-  const showDepthMapRef = useRef<(key: "gas" | "river") => void>(() => {});
-  const depthMapRef = useRef<"gas" | "river">("gas");
+  const kmlDepthLayerRef = useRef<L.GeoJSON | null>(null);
+  const showDepthMapRef = useRef<(key: DepthMapKey) => void>(() => {});
+  const depthMapRef = useRef<DepthMapKey>("gas");
   const pinRef = useRef<THREE.Group | null>(null);
-  const bedRef = useRef<THREE.Mesh | null>(null);
+  const bedRef = useRef<THREE.Mesh | THREE.Points | null>(null);
   const exagRef = useRef(6);
   const shipSizeRef = useRef(1);
   const depthOffsetRef = useRef(0);
@@ -381,18 +397,22 @@ export function SurveyExplorer() {
   const sounderReaderRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null);
   const sounderDoneRef = useRef<Promise<void>>(Promise.resolve());
   const sounderStopRef = useRef(false);
+  const networkDepthRef = useRef(false);
   const shipFramedRef = useRef(false);
+  const followShipRef = useRef(false);
+  const centerShipRef = useRef<() => void>(() => {});
+  const pauseFollowRef = useRef<() => void>(() => {});
   const syncPinRef = useRef<(lat: number, lng: number) => void>(() => {});
   const frameShipRef = useRef<(lat: number, lng: number) => void>(() => {});
   const stopTrackingRef = useRef<() => void>(() => {});
   const apiRef = useRef<{
     place?: (lat: number, lng: number, pan: boolean) => void;
     focus?: (lat: number, lng: number) => void;
-    locate?: (lat: number, lng: number, sogKn?: number | null, headingDeg?: number | null) => void;
+    locate?: (lat: number, lng: number, sogKn?: number | null, headingDeg?: number | null, fromGps?: boolean) => void;
   }>({});
 
   const [survey, setSurvey] = useState<Survey | null>(null);
-  const [depthMap, setDepthMap] = useState<"gas" | "river">("gas");
+  const [depthMap, setDepthMap] = useState<DepthMapKey>("gas");
   const [error, setError] = useState<string | null>(null);
   const [booting, setBooting] = useState(true);
   const [shipName, setShipName] = useState("");
@@ -410,11 +430,13 @@ export function SurveyExplorer() {
   const [daymarksOn, setDaymarksOn] = useState(true);
   const [depthsOn, setDepthsOn] = useState(false);
   const [exag, setExag] = useState(6);
-  const [shipSize, setShipSize] = useState(1);
+  const [displaySettings, setDisplaySettings] = useState<DisplaySettings>(DEFAULT_DISPLAY_SETTINGS);
+  const [settingsReady, setSettingsReady] = useState(false);
+  const shipSize = displaySettings.shipSize;
   const [depthOffset, setDepthOffset] = useState(0);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [pane, setPane] = useState<ViewMode>("map");
-  const [menu, setMenu] = useState<"comms" | "chart" | "nav" | "plan" | "windows" | null>(null);
+  const [menu, setMenu] = useState<"comms" | "chart" | "nav" | "plan" | "windows" | "settings" | null>(null);
   const [infoPanelVisible, setInfoPanelVisible] = useState(false);
   const [infoPosition, setInfoPosition] = useState({ x: 12, y: 12 });
   const [weatherPanelVisible, setWeatherPanelVisible] = useState(false);
@@ -449,6 +471,7 @@ export function SurveyExplorer() {
   const [rightOpen, setRightOpen] = useState(false);
   const [sideToolsOpen, setSideToolsOpen] = useState(false);
   const [tracking, setTracking] = useState(false);
+  const [followShip, setFollowShip] = useState(false);
   const [serialOn, setSerialOn] = useState(false);
   const [serialSource, setSerialSource] = useState<"JRC" | "Bluetooth SPP" | null>(null);
   const [bluetoothOn, setBluetoothOn] = useState(false);
@@ -456,15 +479,18 @@ export function SurveyExplorer() {
   const [sounderM, setSounderM] = useState<number | null>(null);
   const [sounderRef, setSounderRef] = useState<"surface" | "transducer" | "keel">("transducer");
   const [sounderNote, setSounderNote] = useState<string | null>(null);
+  const [networkPanelOpen, setNetworkPanelOpen] = useState(false);
   const [baud, setBaud] = useState(4800);
   const [framed, setFramed] = useState(false);
   const [linkHref, setLinkHref] = useState("");
   const [sogKn, setSogKn] = useState<number | null>(null);
   const [cogDeg, setCogDeg] = useState<number | null>(null);
   const [headingDeg, setHeadingDeg] = useState<number | null>(null);
-  const [trackOn, setTrackOn] = useState(true);
-  const [courseOn, setCourseOn] = useState(true);
-  const [courseMin, setCourseMin] = useState(6);
+  const trackOn = displaySettings.trackVisible;
+  const courseOn = displaySettings.courseVisible;
+  const courseMin = displaySettings.courseMinutes;
+  const speedVectorOn = displaySettings.speedVectorVisible;
+  const [speedVectorStatus, setSpeedVectorStatus] = useState<SpeedVectorResult["status"]>("waiting");
   const [vrmOn, setVrmOn] = useState(false);
   const [eblText, setEblText] = useState("0");
   const [vrmText, setVrmText] = useState("0.50");
@@ -512,6 +538,49 @@ export function SurveyExplorer() {
   const [aisNote, setAisNote] = useState<string | null>(null);
   const [aisCredit, setAisCredit] = useState("Open Waters AIS");
 
+  const network = useNetworkUdp({
+    beforeConnect: async () => {
+      if (serialPortRef.current) await disconnectJrc();
+      if (bluetoothDeviceRef.current) await disconnectBluetooth();
+      stopTrackingRef.current();
+      shipFramedRef.current = false;
+      sogRef.current = null; cogRef.current = null; headingRef.current = null;
+      setSogKn(null); setCogDeg(null); setHeadingDeg(null); setGpsNote(null);
+    },
+    onLine: (line) => {
+      applyNmeaFix(parseNmeaLine(line));
+      const depth = parseDepthLine(line);
+      if (depth && !sounderPortRef.current) {
+        networkDepthRef.current = true;
+        setSounderM(depth.meters); setSounderRef(depth.ref);
+        setSounderNote("Depth via Network UDP");
+      }
+    },
+    onStop: () => {
+      clearSpeedVectorRef.current();
+      sogRef.current = null; cogRef.current = null;
+      setSogKn(null); setCogDeg(null);
+      if (networkDepthRef.current && !sounderPortRef.current) { setSounderM(null); setSounderNote(null); }
+      networkDepthRef.current = false;
+    },
+  });
+
+  useEffect(() => {
+    try { setDisplaySettings(parseDisplaySettings(window.localStorage.getItem(DISPLAY_SETTINGS_KEY))); }
+    catch { /* Defaults also work when browser storage is unavailable. */ }
+    setSettingsReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!settingsReady) return;
+    try { window.localStorage.setItem(DISPLAY_SETTINGS_KEY, JSON.stringify(displaySettings)); }
+    catch { /* Keep applying preferences in the current session. */ }
+  }, [displaySettings, settingsReady]);
+
+  function updateDisplaySettings(patch: Partial<DisplaySettings>) {
+    setDisplaySettings((current) => normalizeDisplaySettings({ ...current, ...patch }));
+  }
+
   useEffect(() => {
     let savedTheme: "light" | "dark" = "dark";
     try {
@@ -550,6 +619,10 @@ export function SurveyExplorer() {
   depthsOnRef.current = depthsOn;
   baseRef.current = base;
   seamarksRef.current = seamarks;
+  displaySettingsRef.current = displaySettings;
+  trackOnRef.current = trackOn;
+  courseOnRef.current = courseOn;
+  courseMinRef.current = courseMin;
 
   function bowDeg(): number | null {
     return headingRef.current ?? cogRef.current;
@@ -620,10 +693,13 @@ export function SurveyExplorer() {
     const Leaflet = leafletRef.current;
     const pts = trackPtsRef.current;
     if (!map || !Leaflet || !trackOnRef.current || pts.length < 2) return;
+    const settings = displaySettingsRef.current;
+    const visible = pts.slice(-settings.trackPoints);
+    const style = { color: settings.trackColor, weight: settings.trackWidth, opacity: settings.trackOpacity };
     if (!trackLineRef.current) {
-      trackLineRef.current = Leaflet.polyline(pts, { color: "#bd641d", weight: 3, opacity: 0.92 }).addTo(map);
+      trackLineRef.current = Leaflet.polyline(visible, style).addTo(map);
     } else {
-      trackLineRef.current.setLatLngs(pts);
+      trackLineRef.current.setLatLngs(visible).setStyle(style);
     }
   }
 
@@ -635,6 +711,9 @@ export function SurveyExplorer() {
     if (pts.length > 8000) pts.splice(0, pts.length - 8000);
     drawTrack();
   }
+
+  drawTrackRef.current = drawTrack;
+  pushTrackRef.current = pushTrack;
 
   function drawVrm(lat: number, lng: number) {
     const map = mapRef.current;
@@ -909,6 +988,26 @@ export function SurveyExplorer() {
     pushAlarm("Anchor watch acknowledged.");
   }
 
+  function drawSpeedVector() {
+    const map = mapRef.current;
+    const Leaflet = leafletRef.current;
+    const result = calculateSpeedVector(vectorTelemetryRef.current, Date.now());
+    if (!displaySettingsRef.current.speedVectorVisible || result.status !== "ready" || !map || !Leaflet) {
+      speedVectorLayerRef.current?.group.remove();
+      speedVectorLayerRef.current = null;
+      setSpeedVectorStatus(result.status);
+      return;
+    }
+    speedVectorLayerRef.current = renderSpeedVector(Leaflet, map, result.vector, speedVectorLayerRef.current);
+    setSpeedVectorStatus("ready");
+  }
+
+  drawSpeedVectorRef.current = drawSpeedVector;
+  clearSpeedVectorRef.current = () => {
+    vectorTelemetryRef.current = { position: null, motion: null };
+    drawSpeedVectorRef.current();
+  };
+
   function syncNav(lat: number, lng: number) {
     const map = mapRef.current;
     const Leaflet = leafletRef.current;
@@ -921,6 +1020,7 @@ export function SurveyExplorer() {
     if (!courseOnRef.current || course == null) {
       courseLineRef.current?.remove();
       courseLineRef.current = null;
+      drawSpeedVectorRef.current();
       return;
     }
     const sog = sogRef.current;
@@ -936,6 +1036,7 @@ export function SurveyExplorer() {
     } else {
       courseLineRef.current.setLatLngs(pts);
     }
+    drawSpeedVectorRef.current();
   }
 
   syncNavRef.current = syncNav;
@@ -943,7 +1044,7 @@ export function SurveyExplorer() {
   function toggleTrack() {
     const next = !trackOnRef.current;
     trackOnRef.current = next;
-    setTrackOn(next);
+    updateDisplaySettings({ trackVisible: next });
     if (!next) {
       trackLineRef.current?.remove();
       trackLineRef.current = null;
@@ -955,14 +1056,14 @@ export function SurveyExplorer() {
   function toggleCourse() {
     const next = !courseOnRef.current;
     courseOnRef.current = next;
-    setCourseOn(next);
+    updateDisplaySettings({ courseVisible: next });
     const here = hitRef.current;
     if (here) syncNav(here.lat, here.lng);
   }
 
   function setCourseMinutes(minutes: number) {
     courseMinRef.current = minutes;
-    setCourseMin(minutes);
+    updateDisplaySettings({ courseMinutes: minutes });
     const here = hitRef.current;
     if (here) syncNav(here.lat, here.lng);
   }
@@ -1046,6 +1147,13 @@ export function SurveyExplorer() {
       watchRef.current = null;
     }
     setTracking(false);
+    clearSpeedVectorRef.current();
+  };
+
+  // Free chart browsing pauses the camera lock without disconnecting any position source.
+  pauseFollowRef.current = () => {
+    followShipRef.current = false;
+    setFollowShip(false);
   };
 
   armAnchorRef.current = armAnchor;
@@ -1067,6 +1175,29 @@ export function SurveyExplorer() {
   }, [shipSize]);
 
   useEffect(() => {
+    if (!trackOn) {
+      trackLineRef.current?.remove();
+      trackLineRef.current = null;
+    } else drawTrackRef.current();
+  }, [trackOn, displaySettings.trackColor, displaySettings.trackWidth, displaySettings.trackOpacity, displaySettings.trackPoints]);
+
+  useEffect(() => {
+    const here = hitRef.current;
+    if (here) syncNavRef.current(here.lat, here.lng);
+  }, [courseOn, courseMin, speedVectorOn]);
+
+  useEffect(() => {
+    const id = window.setInterval(() => drawSpeedVectorRef.current(), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const opacity = (base === "chart" ? 0.92 : 0.96) * displaySettings.depthOpacity;
+    for (const layer of depthLayersRef.current) layer.setOpacity(opacity);
+    if (kmlDepthLayerRef.current) setKmlDepthOpacity(kmlDepthLayerRef.current, displaySettings.depthOpacity);
+  }, [base, displaySettings.depthOpacity]);
+
+  useEffect(() => {
     depthOffsetRef.current = depthOffset;
     if (bedRef.current) bedRef.current.position.y = depthOffset * exagRef.current;
   }, [depthOffset]);
@@ -1085,9 +1216,6 @@ export function SurveyExplorer() {
       tiles.addTo(map);
       tiles.bringToBack();
       baseLayerRef.current = tiles;
-      const opacity = base === "chart" ? 0.92 : 0.96;
-      depthLayerRef.current?.setOpacity(opacity);
-      for (const layer of depthLayersRef.current) layer.setOpacity(opacity);
     });
     return () => {
       cancelled = true;
@@ -1114,6 +1242,11 @@ export function SurveyExplorer() {
       if (depthsOn) chrome.addTo(map);
       else if (map.hasLayer(chrome)) map.removeLayer(chrome);
     }
+    const kml = kmlDepthLayerRef.current;
+    if (kml) {
+      if (depthsOn) kml.addTo(map);
+      else if (map.hasLayer(kml)) map.removeLayer(kml);
+    }
   }, [depthsOn]);
 
   useEffect(() => {
@@ -1126,6 +1259,21 @@ export function SurveyExplorer() {
     const group = daymarkGroupRef.current;
     if (group) group.visible = daymarksOn && depthMapRef.current === "river";
   }, [daymarksOn]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !followShip) return;
+    const previous = {
+      scrollWheelZoom: map.options.scrollWheelZoom,
+      doubleClickZoom: map.options.doubleClickZoom,
+      touchZoom: map.options.touchZoom,
+    };
+    // Zoom around the locked ship, rather than moving it toward the mouse or pinch.
+    map.options.scrollWheelZoom = "center";
+    map.options.doubleClickZoom = "center";
+    map.options.touchZoom = "center";
+    return () => { Object.assign(map.options, previous); };
+  }, [followShip]);
 
   useEffect(() => {
     const mapNode = mapEl.current;
@@ -1165,6 +1313,15 @@ export function SurveyExplorer() {
     } as L.MapOptions);
     mapRef.current = map;
     aisLayerRef.current = L.layerGroup().addTo(map);
+    const pauseFollow = () => pauseFollowRef.current();
+    const keepShipCentered = () => {
+      if (followShipRef.current) centerShipRef.current();
+    };
+    map.on("dragstart", pauseFollow);
+    map.on("resize", keepShipCentered);
+    map.on("zoomend", keepShipCentered);
+    const redrawSpeedVector = () => drawSpeedVectorRef.current();
+    map.on("zoomend rotate", redrawSpeedVector);
 
     const host = map.getContainer();
     const rotatable = map as L.Map & { setBearing?: (bearing: number) => void; getBearing?: () => number };
@@ -1237,6 +1394,7 @@ export function SurveyExplorer() {
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.maxPolarAngle = Math.PI * 0.48;
+    controls.addEventListener("start", pauseFollow);
 
     const ambient = new THREE.AmbientLight(0xffffff, 0.72);
     const sun = new THREE.DirectionalLight(0xfff4e0, 1.15);
@@ -1292,9 +1450,18 @@ export function SurveyExplorer() {
       controls.update();
     };
 
-    function place(lat: number, lng: number, pan: boolean, fromDrag = false) {
+    centerShipRef.current = () => {
+      const here = hitRef.current;
+      if (!here) return;
+      // Update the marker and chart in the same frame; animated pans make the ship drift.
+      map.panTo([here.lat, here.lng], { animate: false });
+      frameShipRef.current(here.lat, here.lng);
+    };
+
+    function place(lat: number, lng: number, pan: boolean, fromDrag = false, fromLive = false) {
       const data = surveyRef.current;
       if (!data) return;
+      if (!fromLive) vectorTelemetryRef.current.position = null;
       const next = { lat, lng, depth: depthFromSurveys(surveysRef.current, lat, lng) };
       hitRef.current = next;
       setHit(next);
@@ -1304,19 +1471,20 @@ export function SurveyExplorer() {
       setLngHemi(lng < 0 ? "W" : "E");
       const marker = pickRef.current;
       if (marker && !fromDrag) marker.setLatLng([lat, lng]);
-      if (pan) map.panTo([lat, lng]);
       syncPin(lat, lng);
       syncNavRef.current(lat, lng);
+      if (followShipRef.current) centerShipRef.current();
+      else if (pan) map.panTo([lat, lng]);
     }
 
     function resize() {
+      map.invalidateSize();
       const w = view.clientWidth;
       const h = view.clientHeight;
       if (w < 2 || h < 2) return;
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      map.invalidateSize();
     }
     const observer = new ResizeObserver(resize);
 
@@ -1361,6 +1529,7 @@ export function SurveyExplorer() {
         setDest({ lat: geo.lat, lng: geo.lng });
         return;
       }
+      pauseFollowRef.current();
       stopTrackingRef.current();
       place(geo.lat, geo.lng, true);
     };
@@ -1375,11 +1544,17 @@ export function SurveyExplorer() {
       fetch("/survey-river.json")
         .then((r) => (r.ok ? (r.json() as Promise<Survey>) : null))
         .catch(() => null),
+      fetch(ABDULLAH_KML_URL)
+        .then((r) => {
+          if (!r.ok) throw new Error(`تعذر تحميل ${ABDULLAH_SURVEY_NAME}`);
+          return r.text();
+        })
+        .then(parseSurveyKml),
     ])
-      .then(([data, river]) => {
+      .then(([data, river, abdullah]) => {
         if (disposed) return;
         const riverBedSurvey = river ? completeChannel(river) : null;
-        const loaded = [data, riverBedSurvey].filter((item): item is Survey => item != null);
+        const loaded = [data, riverBedSurvey, abdullah.survey].filter((item): item is Survey => item != null);
         surveysRef.current = loaded;
         surveyRef.current = data;
         setSurvey(data);
@@ -1404,7 +1579,8 @@ export function SurveyExplorer() {
           union.extend(bounds);
           L.rectangle(bounds, { color, weight: 1, fill: false, dashArray: "4 4" }).addTo(depthChrome);
           const canvas = paintOverlay(area);
-          const depth = L.imageOverlay(canvas.toDataURL(), bounds, { opacity: 0.92, interactive: false });
+          const opacity = (baseRef.current === "chart" ? 0.92 : 0.96) * displaySettingsRef.current.depthOpacity;
+          const depth = L.imageOverlay(canvas.toDataURL(), bounds, { opacity, interactive: false });
           depthLayers.push(depth);
           const icon = L.divIcon({
             className: "survey-tag",
@@ -1421,12 +1597,17 @@ export function SurveyExplorer() {
         };
         paintArea(data, "#087f83", "مقطع الغاز السائل");
         if (riverBedSurvey) paintArea(riverBedSurvey, "#d08a2f", "مدخل النهر");
+        const kmlLayer = createKmlDepthLayer(L, abdullah, map);
+        setKmlDepthOpacity(kmlLayer, displaySettingsRef.current.depthOpacity);
+        kmlDepthLayerRef.current = kmlLayer;
+        union.extend(kmlLayer.getBounds());
         depthLayersRef.current = depthLayers;
         depthLayerRef.current = depthLayers[0] ?? null;
         depthChromeRef.current = depthChrome;
         if (depthsOnRef.current) {
           for (const layer of depthLayers) layer.addTo(map);
           depthChrome.addTo(map);
+          kmlLayer.addTo(map);
         }
         map.fitBounds(union, { padding: [24, 24] });
 
@@ -1439,7 +1620,7 @@ export function SurveyExplorer() {
         seamarkRef.current = seamark;
         if (seamarksRef.current) seamark.addTo(map);
 
-        const areas: { key: "gas" | "river"; survey: Survey; bed: THREE.Mesh }[] = [];
+        const areas: { key: DepthMapKey; survey: Survey; bed: THREE.Mesh | THREE.Points }[] = [];
         const gasBed = buildBed(THREE, data, scene);
         areas.push({ key: "gas", survey: data, bed: gasBed });
         const dayLayer = L.layerGroup(
@@ -1485,6 +1666,9 @@ export function SurveyExplorer() {
           daymarkGroupRef.current = dayGroup;
           areas.push({ key: "river", survey: riverBedSurvey, bed: riverBed });
         }
+        const abdullahBed = buildSoundings(THREE, abdullah.survey, scene);
+        abdullahBed.visible = false;
+        areas.push({ key: "abdullah", survey: abdullah.survey, bed: abdullahBed });
 
         pickPlane = new THREE.Mesh(
           new THREE.PlaneGeometry(1, 1),
@@ -1493,7 +1677,7 @@ export function SurveyExplorer() {
         pickPlane.rotation.x = -Math.PI / 2;
         scene.add(pickPlane);
 
-        const showModel = (key: "gas" | "river") => {
+        const showModel = (key: DepthMapKey) => {
           const area = areas.find((item) => item.key === key) ?? areas[0];
           surveyRef.current = area.survey;
           bedRef.current = area.bed;
@@ -1523,9 +1707,10 @@ export function SurveyExplorer() {
           controls.update();
           const ship = hitRef.current;
           if (ship) syncPin(ship.lat, ship.lng);
+          keepShipCentered();
         };
         showDepthMapRef.current = showModel;
-        showModel(depthMapRef.current === "river" && riverBedSurvey ? "river" : "gas");
+        showModel(depthMapRef.current);
 
         const pin = buildDredger(THREE);
         pin.visible = false;
@@ -1543,7 +1728,10 @@ export function SurveyExplorer() {
         const marker = L.marker([midLat, midLng], { icon, draggable: true, autoPan: true, zIndexOffset: 900 });
         marker.addTo(map);
         pickRef.current = marker;
-        marker.on("dragstart", () => stopTrackingRef.current());
+        marker.on("dragstart", () => {
+          pauseFollowRef.current();
+          stopTrackingRef.current();
+        });
         marker.on("drag", () => {
           const ll = marker.getLatLng();
           place(ll.lat, ll.lng, false, true);
@@ -1574,6 +1762,7 @@ export function SurveyExplorer() {
             setVrmFromChartRef.current(event.latlng.lat, event.latlng.lng);
             return;
           }
+          pauseFollowRef.current();
           stopTrackingRef.current();
           place(event.latlng.lat, event.latlng.lng, false);
         });
@@ -1594,11 +1783,10 @@ export function SurveyExplorer() {
             const zoom = Math.min(18, Math.max(map.getZoom() || 0, 17));
             map.setView([lat, lng], zoom, { animate: false });
             const areas = surveysRef.current;
-            const index = areas.findIndex(
+            const area = areas.find(
               (area) => lat >= area.south && lat <= area.north && lng >= area.west && lng <= area.east,
             );
-            if (index === 0) pickDepthMap("gas");
-            else if (index === 1) pickDepthMap("river");
+            if (area) pickDepthMap(area.soundings ? "abdullah" : area === data ? "gas" : "river");
             frameShipRef.current(lat, lng);
           };
           requestAnimationFrame(settle);
@@ -1608,13 +1796,20 @@ export function SurveyExplorer() {
         resize();
         observer.observe(view);
         observer.observe(mapHost);
+        if (new URL(window.location.href).searchParams.get("survey") === "abdullah") {
+          depthMapRef.current = "abdullah";
+          setDepthMap("abdullah");
+          showModel("abdullah");
+          setDepthsOn(true);
+          map.fitBounds(kmlLayer.getBounds(), { padding: [28, 28], animate: false });
+        }
         loop();
       })
       .catch((err: unknown) => {
         if (!disposed) setError(err instanceof Error ? err.message : "Load error");
       });
 
-    function locate(lat: number, lng: number, sogKn?: number | null, headingDeg?: number | null) {
+    function locate(lat: number, lng: number, sogKn?: number | null, headingDeg?: number | null, fromGps = false) {
       const data = surveyRef.current;
       const map = mapRef.current;
       const covered = coverage(surveysRef.current, lat, lng);
@@ -1634,13 +1829,17 @@ export function SurveyExplorer() {
         setCogDeg(norm);
       }
       if (!data || !map) return;
+      const at = Date.now();
+      vectorTelemetryRef.current.position = { lat, lng, at };
+      if (fromGps) vectorTelemetryRef.current.motion = { sogKn: sogKn ?? null, cogDeg: headingDeg ?? null, at };
+      pushTrackRef.current(lat, lng);
       const speed = sogRef.current == null ? "" : ` · ${sogRef.current.toFixed(1)} kn`;
       const onSurvey = covered.inside;
-      place(lat, lng, false);
+      place(lat, lng, false, false, true);
       if (!shipFramedRef.current) {
         shipFramedRef.current = true;
-        if (onSurvey) map.panTo([lat, lng]);
-        else {
+        if (!followShipRef.current && onSurvey) map.panTo([lat, lng]);
+        else if (!followShipRef.current) {
           const bounds = L.latLngBounds([data.south, data.west], [data.north, data.east]);
           for (const area of surveysRef.current) bounds.extend([area.south, area.west]).extend([area.north, area.east]);
           bounds.extend([lat, lng]);
@@ -1658,6 +1857,10 @@ export function SurveyExplorer() {
     apiRef.current.place = place;
 
     release = () => {
+      map.off("dragstart", pauseFollow);
+      map.off("resize", keepShipCentered);
+      map.off("zoomend", keepShipCentered);
+      map.off("zoomend rotate", redrawSpeedVector);
       host.removeEventListener("pointerdown", onMapPointerDown, true);
       host.removeEventListener("pointermove", onMapPointerMove);
       host.removeEventListener("pointerup", onMapPointerUp);
@@ -1667,6 +1870,7 @@ export function SurveyExplorer() {
       observer.disconnect();
       renderer.domElement.removeEventListener("pointerdown", onPointerDown);
       renderer.domElement.removeEventListener("pointerup", onPointerUp);
+      controls.removeEventListener("start", pauseFollow);
       controls.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement);
@@ -1675,6 +1879,7 @@ export function SurveyExplorer() {
       baseLayerRef.current = null;
       depthLayerRef.current = null;
       depthLayersRef.current = [];
+      kmlDepthLayerRef.current = null;
       depthChromeRef.current = null;
       seamarkRef.current = null;
       daymarkLayerRef.current = null;
@@ -1687,6 +1892,8 @@ export function SurveyExplorer() {
       voyageLayerRef.current = null;
       trackLineRef.current = null;
       courseLineRef.current = null;
+      speedVectorLayerRef.current = null;
+      vectorTelemetryRef.current = { position: null, motion: null };
       vrmCircleRef.current = null;
       eblLineRef.current = null;
       anchorCircleRef.current = null;
@@ -1696,6 +1903,7 @@ export function SurveyExplorer() {
       aisMarkersRef.current.clear();
       leafletRef.current = null;
       syncPinRef.current = () => {};
+      centerShipRef.current = () => {};
     };
     })();
 
@@ -1959,10 +2167,12 @@ export function SurveyExplorer() {
     const key = `${dest.lat.toFixed(5)},${dest.lng.toFixed(5)}`;
     if (fittedDestRef.current !== key) {
       fittedDestRef.current = key;
-      map.fitBounds(Leaflet.latLngBounds([ship.lat, ship.lng], [dest.lat, dest.lng]), {
-        padding: [48, 48],
-        maxZoom: 16,
-      });
+      if (!followShipRef.current) {
+        map.fitBounds(Leaflet.latLngBounds([ship.lat, ship.lng], [dest.lat, dest.lng]), {
+          padding: [48, 48],
+          maxZoom: 16,
+        });
+      }
     }
   }, [dest, hit]);
 
@@ -1993,6 +2203,7 @@ export function SurveyExplorer() {
   }, [wps, hit]);
 
   function askGps() {
+    if (network.navigationActive) { setGpsNote("افصل Network UDP قبل تشغيل مصدر GPS آخر."); return; }
     if (!navigator.geolocation) {
       setGpsNote("This browser has no position fix.");
       return;
@@ -2007,7 +2218,7 @@ export function SurveyExplorer() {
     watchRef.current = navigator.geolocation.watchPosition(
       (pos) => {
         const speedKn = pos.coords.speed == null ? null : pos.coords.speed * 1.943844;
-        apiRef.current.locate?.(pos.coords.latitude, pos.coords.longitude, speedKn, pos.coords.heading);
+        apiRef.current.locate?.(pos.coords.latitude, pos.coords.longitude, speedKn, pos.coords.heading, true);
       },
       () => {
         stopTrackingRef.current();
@@ -2030,7 +2241,11 @@ export function SurveyExplorer() {
   }
 
   function applyNmeaFix(fix: NmeaFix | null) {
-    if (!fix || !fix.valid) return;
+    if (!fix) return;
+    if (!fix.valid) {
+      clearSpeedVectorRef.current();
+      return;
+    }
     if (fix.lat != null && fix.lng != null) {
       const surveys = surveysRef.current;
       if (surveys.length) {
@@ -2045,6 +2260,9 @@ export function SurveyExplorer() {
       sogRef.current = fix.sogKn;
       setSogKn(fix.sogKn);
     }
+    if (fix.motionUpdated) {
+      vectorTelemetryRef.current.motion = { sogKn: fix.sogKn, cogDeg: fix.cogDeg, at: Date.now() };
+    }
     if (fix.cogDeg != null) {
       cogRef.current = ((fix.cogDeg % 360) + 360) % 360;
       setCogDeg(cogRef.current);
@@ -2054,7 +2272,6 @@ export function SurveyExplorer() {
       setHeadingDeg(headingRef.current);
     }
     if (fix.lat != null && fix.lng != null) {
-      pushTrack(fix.lat, fix.lng);
       apiRef.current.locate?.(fix.lat, fix.lng, fix.sogKn ?? sogRef.current);
     } else if (hitRef.current && (fix.cogDeg != null || fix.headingDeg != null || fix.sogKn != null)) {
       syncNav(hitRef.current.lat, hitRef.current.lng);
@@ -2079,6 +2296,7 @@ export function SurveyExplorer() {
   }
 
   async function disconnectBluetooth() {
+    clearSpeedVectorRef.current();
     clearBluetoothConnection();
     setBluetoothOn(false);
     setSogKn(null);
@@ -2087,6 +2305,7 @@ export function SurveyExplorer() {
   }
 
   async function connectBluetooth() {
+    if (network.navigationActive) { setGpsNote("افصل Network UDP قبل تشغيل مصدر GPS آخر."); return; }
     if (bluetoothDeviceRef.current) {
       await disconnectBluetooth();
       return;
@@ -2113,6 +2332,7 @@ export function SurveyExplorer() {
       bluetoothDeviceRef.current = device;
       const disconnectHandler: EventListener = () => {
         if (bluetoothDeviceRef.current !== device) return;
+        clearSpeedVectorRef.current();
         const characteristic = bluetoothCharacteristicRef.current;
         const valueHandler = bluetoothValueHandlerRef.current;
         if (characteristic && valueHandler) characteristic.removeEventListener("characteristicvaluechanged", valueHandler);
@@ -2196,6 +2416,7 @@ export function SurveyExplorer() {
   }
 
   async function disconnectJrc() {
+    clearSpeedVectorRef.current();
     const source = serialSource;
     serialStopRef.current = true;
     const reader = serialReaderRef.current;
@@ -2250,6 +2471,7 @@ export function SurveyExplorer() {
         const { value, done } = await reader.read();
         if (done) {
           if (locked && !serialStopRef.current) {
+            clearSpeedVectorRef.current();
             setSerialOn(false);
             setSerialSource(null);
             serialPortRef.current = null;
@@ -2287,6 +2509,7 @@ export function SurveyExplorer() {
       }
     } catch {
       if (locked && !serialStopRef.current) {
+        clearSpeedVectorRef.current();
         setSerialOn(false);
         setSerialSource(null);
         serialPortRef.current = null;
@@ -2410,6 +2633,7 @@ export function SurveyExplorer() {
   }
 
   async function connectJrc() {
+    if (network.navigationActive) { setGpsNote("افصل Network UDP قبل تشغيل مصدر GPS آخر."); return; }
     if (serialPortRef.current) {
       if (serialSource === "JRC") await disconnectJrc();
       else setGpsNote("Disconnect the Bluetooth COM receiver before connecting JRC.");
@@ -2453,6 +2677,7 @@ export function SurveyExplorer() {
   }
 
   async function connectBluetoothSpp() {
+    if (network.navigationActive) { setGpsNote("افصل Network UDP قبل تشغيل مصدر GPS آخر."); return; }
     if (serialPortRef.current) {
       if (serialSource === "Bluetooth SPP") await disconnectJrc();
       else setGpsNote("Disconnect JRC before connecting a Bluetooth COM receiver.");
@@ -2689,10 +2914,18 @@ export function SurveyExplorer() {
     }
   }
 
-  function pickDepthMap(key: "gas" | "river") {
+  function pickDepthMap(key: DepthMapKey) {
     depthMapRef.current = key;
     setDepthMap(key);
     showDepthMapRef.current(key);
+  }
+
+  function focusAbdullahSurvey() {
+    pauseFollowRef.current();
+    pickDepthMap("abdullah");
+    setDepthsOn(true);
+    const bounds = kmlDepthLayerRef.current?.getBounds();
+    if (bounds?.isValid()) mapRef.current?.fitBounds(bounds, { padding: [28, 28], animate: false });
   }
 
   function jumpToDraft() {
@@ -2702,6 +2935,7 @@ export function SurveyExplorer() {
       setGpsNote("Enter a valid latitude and longitude.");
       return;
     }
+    pauseFollowRef.current();
     stopTrackingRef.current();
     setGpsNote(null);
     setPane("map");
@@ -2745,6 +2979,7 @@ export function SurveyExplorer() {
       setWpNote("أضف نقطة واحدة على الأقل.");
       return;
     }
+    pauseFollowRef.current();
     setWps(next);
     loadWpRows(next);
     setVoyageOn(false);
@@ -2760,16 +2995,21 @@ export function SurveyExplorer() {
   }
 
   function goToShip() {
-    const here = hitRef.current;
-    if (!here) return;
-    mapRef.current?.panTo([here.lat, here.lng], { animate: true });
-    frameShipRef.current(here.lat, here.lng);
+    if (!hitRef.current) return;
+    const next = !followShipRef.current;
+    followShipRef.current = next;
+    setFollowShip(next);
+    if (next) {
+      mapRef.current?.stop();
+      centerShipRef.current();
+    }
   }
 
   function recenter() {
     const list = surveysRef.current;
     const map = mapRef.current;
     if (!list.length || !map) return;
+    pauseFollowRef.current();
     const points: [number, number][] = [];
     for (const area of list) points.push([area.south, area.west], [area.north, area.east]);
     map.fitBounds(points, { padding: [24, 24] });
@@ -2831,8 +3071,9 @@ export function SurveyExplorer() {
         <button
           type="button"
           onClick={goToShip}
-          title="Go to ship — centre own ship on the chart and the model"
-          className="h-8 rounded-lg bg-accent px-3 text-xs font-bold tracking-wide text-bg"
+          aria-pressed={followShip}
+          title={followShip ? "متابعة السفينة مفعّلة — اضغط لإيقافها" : "تمركز على السفينة ومتابعتها في منتصف العرض"}
+          className={`h-8 rounded-lg px-3 text-xs font-bold tracking-wide text-bg ${followShip ? "bg-sand" : "bg-accent"}`}
         >
           GTS
         </button>
@@ -2888,8 +3129,12 @@ export function SurveyExplorer() {
           <button type="button" role="tab" id="ecdis-tab-nav" aria-controls="tool-menu" aria-selected={menu === "nav"} onClick={() => setMenu((current) => current === "nav" ? null : "nav")} className={`shrink-0 border-b-2 px-3 py-2 text-xs font-medium ${menu === "nav" ? "border-accent text-accent" : "border-transparent text-muted hover:text-fg"}`}>Route monitoring</button>
           <button type="button" role="tab" id="ecdis-tab-comms" aria-controls="tool-menu" aria-selected={menu === "comms"} onClick={() => setMenu((current) => current === "comms" ? null : "comms")} className={`shrink-0 border-b-2 px-3 py-2 text-xs font-medium ${menu === "comms" ? "border-accent text-accent" : "border-transparent text-muted hover:text-fg"}`}>Sensors & connections</button>
           <button type="button" role="tab" id="ecdis-tab-windows" aria-controls="tool-menu" aria-selected={menu === "windows"} onClick={() => setMenu((current) => current === "windows" ? null : "windows")} className={`shrink-0 border-b-2 px-3 py-2 text-xs font-medium ${menu === "windows" ? "border-accent text-accent" : "border-transparent text-muted hover:text-fg"}`}>Windows</button>
+          <button type="button" role="tab" id="ecdis-tab-settings" aria-controls="tool-menu" aria-selected={menu === "settings"} onClick={() => setMenu((current) => current === "settings" ? null : "settings")} className={`shrink-0 border-b-2 px-3 py-2 text-xs font-medium ${menu === "settings" ? "border-accent text-accent" : "border-transparent text-muted hover:text-fg"}`}>setting</button>
         </nav>
             <div key={menu ?? "closed"} id="tool-menu" role="tabpanel" aria-labelledby={menu ? `ecdis-tab-${menu}` : undefined} className={`${menu ? "menu-drop ecdis-ribbon__commands [&_button]:justify-start [&_a]:justify-start" : "hidden"}`}>
+          {menu === "settings" ? (
+            <DisplaySettingsPanel settings={displaySettings} onChange={updateDisplaySettings} onReset={() => setDisplaySettings({ ...DEFAULT_DISPLAY_SETTINGS })} />
+          ) : null}
           {menu === "windows" ? (
             <>
               <label className="flex h-10 min-w-64 items-center gap-2 rounded-lg border border-line bg-surface-2 px-3 text-xs">
@@ -2995,7 +3240,7 @@ export function SurveyExplorer() {
                 <button
                   type="button"
                   onClick={() => void connectJrc()}
-                  disabled={serialOn && serialSource !== "JRC"}
+                  disabled={network.navigationActive || (serialOn && serialSource !== "JRC")}
                   className={`flex h-8 items-center gap-2 rounded-lg px-3 text-xs font-medium ${serialOn && serialSource === "JRC" ? "bg-sand text-bg" : "bg-accent text-bg"} disabled:cursor-not-allowed disabled:opacity-50`}
                 >
                   <Cable className="size-3.5" />
@@ -3006,7 +3251,7 @@ export function SurveyExplorer() {
                 type="button"
                 onClick={() => void connectBluetooth()}
                 title="Connect a BLE DGPS receiver that sends NMEA over Nordic UART or HM-10. Browser Bluetooth does not support Classic SPP."
-                disabled={serialOn}
+                disabled={network.navigationActive || serialOn}
                 className={`flex h-8 items-center gap-2 rounded-lg px-3 text-xs font-medium ${bluetoothOn ? "bg-sand text-bg" : "bg-surface-2"} disabled:cursor-not-allowed disabled:opacity-50`}
               >
                 <Bluetooth className="size-3.5" />
@@ -3016,7 +3261,7 @@ export function SurveyExplorer() {
                 type="button"
                 onClick={() => void connectBluetoothSpp()}
                 title="يربط منفذ DGPS التسلسلي ويجرب كل السرعات: 4800 ثم 9600 و19200 و38400 و57600 و115200 و2400."
-                disabled={serialOn && serialSource !== "Bluetooth SPP" || bluetoothOn}
+                disabled={network.navigationActive || (serialOn && serialSource !== "Bluetooth SPP") || bluetoothOn}
                 className={`flex h-8 items-center gap-2 rounded-lg px-3 text-xs font-medium ${serialOn && serialSource === "Bluetooth SPP" ? "bg-sand text-bg" : "bg-surface-2"} disabled:cursor-not-allowed disabled:opacity-50`}
               >
                 <Bluetooth className="size-3.5" />
@@ -3053,10 +3298,14 @@ export function SurveyExplorer() {
                   <option value={2400}>2400</option>
                 </select>
               </label>
-              <button type="button" onClick={askGps} className={`flex h-8 items-center gap-2 rounded-lg px-3 text-xs font-medium ${tracking ? "bg-sand text-bg" : "bg-surface-2"}`}>
+              <button type="button" onClick={askGps} disabled={network.navigationActive} className={`flex h-8 items-center gap-2 rounded-lg px-3 text-xs font-medium disabled:opacity-50 ${tracking ? "bg-sand text-bg" : "bg-surface-2"}`}>
                 <LocateFixed className="size-3.5" />
                 {tracking ? "Stop tracking" : "Own ship GPS"}
               </button>
+              <button type="button" onClick={() => setNetworkPanelOpen((open) => !open)} aria-expanded={networkPanelOpen} className={`flex h-8 items-center gap-2 rounded-lg px-3 text-xs font-medium ${network.running ? "bg-sand text-bg" : networkPanelOpen ? "bg-accent text-bg" : "bg-surface-2"}`}>
+                <Radio className="size-3.5" aria-hidden="true" /> Network UDP
+              </button>
+              {networkPanelOpen ? <NetworkUdpPanel network={network} /> : null}
             </>
           ) : null}
           {menu === "chart" ? (
@@ -3119,6 +3368,15 @@ export function SurveyExplorer() {
           ) : null}
           {menu === "nav" ? (
             <>
+              <button
+                type="button"
+                onClick={() => updateDisplaySettings({ speedVectorVisible: !speedVectorOn })}
+                className={`h-8 rounded-lg px-3 text-xs font-medium ${speedVectorOn ? "bg-accent text-bg" : "bg-surface-2"}`}
+                aria-pressed={speedVectorOn}
+                title="متجه السرعة لمدة 10 دقائق محسوب من SOG وCOG"
+              >
+                SPEED VECTOR · 10 min
+              </button>
               <button
                 type="button"
                 onClick={toggleTrack}
@@ -3444,16 +3702,39 @@ export function SurveyExplorer() {
 
       <div className={`grid min-h-0 min-w-0 flex-1 overflow-hidden ${pane === "both" ? "grid-rows-2 lg:grid-cols-2 lg:grid-rows-1" : "grid-rows-1"}`}>
         <div className={`${pane === "model" ? "hidden" : "relative isolate flex"} min-h-0 flex-col overflow-hidden`}>
-          <div ref={mapEl} className="min-h-0 flex-1" />
-          <button
-            type="button"
-            onClick={() => setDepthsOn((v) => !v)}
-            className={`absolute bottom-3 left-3 z-[500] h-8 rounded-lg border border-line px-3 text-xs font-medium shadow ${depthsOn ? "bg-accent text-bg" : "bg-surface/95 text-fg"}`}
-            title="إخفاء أو إظهار خرائط الأعماق. العوامات تبقى"
-            aria-pressed={depthsOn}
-          >
-            {depthsOn ? "إخفاء الأعماق" : "إظهار الأعماق"}
-          </button>
+          <div ref={mapEl} className="min-h-0 flex-1" style={{ "--ship-scale": shipSize } as CSSProperties} />
+          {speedVectorOn ? (
+            <div className="pointer-events-none absolute top-3 left-14 z-[500] max-w-[calc(100%-7rem)] rounded-lg border border-line bg-surface/95 px-2 py-1 text-[11px] shadow" aria-label="Speed vector لمدة 10 دقائق">
+              <p className="font-semibold text-accent" dir="ltr">Speed vector · {SPEED_VECTOR_MINUTES} min</p>
+              <p className="text-muted" dir={speedVectorStatus === "ready" ? "ltr" : "rtl"}>
+                {speedVectorStatus === "ready"
+                  ? `${(vectorTelemetryRef.current.motion?.sogKn ?? 0).toFixed(1)} kn · ${(vectorTelemetryRef.current.motion?.cogDeg ?? 0).toFixed(0)}°T · ${((vectorTelemetryRef.current.motion?.sogKn ?? 0) * SPEED_VECTOR_MINUTES / 60).toFixed(2)} NM`
+                  : speedVectorStatus === "stopped" ? "السفينة متوقفة"
+                  : speedVectorStatus === "stale" ? "بانتظار بيانات حركة حديثة"
+                  : "بانتظار بيانات SOG وCOG"}
+              </p>
+            </div>
+          ) : null}
+          <div className="absolute bottom-3 left-3 z-[500] flex max-w-[calc(100%-1.5rem)] flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setDepthsOn((v) => !v)}
+              className={`h-8 rounded-lg border border-line px-3 text-xs font-medium shadow ${depthsOn ? "bg-accent text-bg" : "bg-surface/95 text-fg"}`}
+              title="إخفاء أو إظهار خرائط الأعماق. العوامات تبقى"
+              aria-pressed={depthsOn}
+            >
+              {depthsOn ? "إخفاء الأعماق" : "إظهار الأعماق"}
+            </button>
+            <button
+              type="button"
+              onClick={focusAbdullahSurvey}
+              className={`h-8 rounded-lg border border-line px-3 text-xs font-medium shadow ${depthMap === "abdullah" ? "bg-accent text-bg" : "bg-surface/95 text-fg"}`}
+              title="عرض ملف الأعماق الأصلي في موقعه المسجّل"
+              dir="rtl"
+            >
+              خور عبد الله <bdi dir="ltr">11-13</bdi>
+            </button>
+          </div>
           {voyage && voyage.legs.length > 0 ? (
             <div className="absolute top-3 right-3 z-[500] max-h-[52%] w-[min(22rem,calc(100%-1.5rem))] overflow-auto rounded-xl border border-line bg-surface/95 p-2 text-xs shadow-lg">
               <div className="mb-1 flex items-baseline justify-between gap-2">
@@ -3558,6 +3839,7 @@ export function SurveyExplorer() {
                         type="button"
                         className="w-full rounded-lg bg-surface-2 px-2 py-1.5 text-left"
                         onClick={() => {
+                          pauseFollowRef.current();
                           mapRef.current?.panTo([ship.lat, ship.lng]);
                           aisMarkersRef.current.get(ship.id)?.openPopup();
                         }}
@@ -3586,7 +3868,7 @@ export function SurveyExplorer() {
         <div className={`${pane === "map" ? "hidden" : "flex"} relative min-h-0 flex-col overflow-hidden`}>
           <div ref={viewEl} className="relative min-h-0 flex-1 overflow-hidden" />
           <div
-            className="absolute top-2 left-1/2 z-20 flex -translate-x-1/2 rounded-lg border border-line bg-surface/95 p-0.5 shadow"
+            className="absolute top-2 left-1/2 z-20 flex max-w-[calc(100%-1rem)] -translate-x-1/2 overflow-x-auto whitespace-nowrap rounded-lg border border-line bg-surface/95 p-0.5 shadow [&>button]:shrink-0"
             dir="rtl"
             role="tablist"
             aria-label="خرائط الأعماق"
@@ -3609,6 +3891,15 @@ export function SurveyExplorer() {
             >
               مدخل النهر
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={depthMap === "abdullah"}
+              onClick={focusAbdullahSurvey}
+              className={`h-7 rounded-md px-2.5 text-xs font-medium ${depthMap === "abdullah" ? "bg-accent text-bg" : "text-fg"}`}
+            >
+              خور عبد الله <bdi dir="ltr">11-13</bdi>
+            </button>
           </div>
           <div className="pointer-events-none absolute bottom-3 left-3 right-3 flex flex-col gap-1">
             <p className="w-fit rounded-lg bg-surface/90 px-3 py-1 text-xs text-muted">
@@ -3627,7 +3918,7 @@ export function SurveyExplorer() {
             <section className="rounded-xl border border-line bg-surface p-2">
               <div className="mb-1 flex items-center justify-between gap-2">
                 <p className="text-xs font-medium">Own ship (GPS)</p>
-                <span className={`text-[10px] ${serialOn || bluetoothOn || tracking ? "text-accent" : "text-muted"}`}>{serialOn || bluetoothOn || tracking ? "Connected" : "Manual"}</span>
+                <span className={`text-[10px] ${serialOn || bluetoothOn || tracking || network.navigationActive ? "text-accent" : "text-muted"}`}>{network.navigationActive ? network.live ? "UDP live" : "UDP waiting" : serialOn || bluetoothOn || tracking ? "Connected" : "Manual"}</span>
               </div>
               <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs" dir="ltr">
                 <dt className="text-muted">Position</dt>
@@ -3639,7 +3930,7 @@ export function SurveyExplorer() {
                 <dt className="text-muted">Depth</dt>
                 <dd className="text-right">{sounderM != null ? `${sounderM.toFixed(1)} m` : hit?.depth == null ? "—" : formatDepth(hit.depth)}</dd>
               </dl>
-              <button type="button" onClick={goToShip} className="mt-2 h-8 w-full rounded-lg bg-accent text-xs font-bold text-bg" title="Go to ship — centre own ship">GTS — Go to ship</button>
+              <button type="button" onClick={goToShip} aria-pressed={followShip} className={`mt-2 h-8 w-full rounded-lg text-xs font-bold text-bg ${followShip ? "bg-sand" : "bg-accent"}`} title={followShip ? "متابعة السفينة مفعّلة — اضغط لإيقافها" : "تمركز على السفينة ومتابعتها في منتصف العرض"}>GTS — Go to ship</button>
             </section>
             <section className="rounded-xl border border-line bg-surface p-2 text-xs">
               <p className="mb-1 font-medium">Route</p>
@@ -3656,7 +3947,8 @@ export function SurveyExplorer() {
             </section>
             <section className="rounded-xl border border-line bg-surface p-2 text-xs">
               <p className="mb-1 font-medium">Depth key</p>
-              <p className="mb-1 text-[11px] text-muted">{depthMap === "river" ? "مدخل النهر — أعماق متصلة ومعالم نهارية" : "مقطع الغاز السائل"}</p>
+              <p className="mb-1 text-[11px] text-muted">{depthMap === "abdullah" ? `${ABDULLAH_SURVEY_NAME} — القياسات الأصلية` : depthMap === "river" ? "مدخل النهر — أعماق متصلة ومعالم نهارية" : "مقطع الغاز السائل"}</p>
+              {depthMap === "abdullah" ? <a href={ABDULLAH_KMZ_URL} download className="mb-2 inline-block underline">تنزيل ملف KMZ الأصلي</a> : null}
               <div
                 className="h-3 rounded-full"
                 style={{ background: LEGEND_GRADIENT }}
@@ -4089,7 +4381,7 @@ export function SurveyExplorer() {
                   value={shipSize}
                   aria-label="حجم السفينة"
                   aria-valuetext={`${shipSize.toFixed(2)}×`}
-                  onChange={(event) => setShipSize(Number(event.target.value))}
+                  onChange={(event) => updateDisplaySettings({ shipSize: Number(event.target.value) })}
                   className="min-w-0 flex-1 accent-accent"
                   dir="ltr"
                 />
@@ -4485,6 +4777,24 @@ function buildDredger(THREE: typeof import("three")) {
   mast.position.set(0, 1.85, 1.7);
   ship.add(cabin, bridge, windows, stack, vent, mast);
   return ship;
+}
+
+/** Plot only the original XYZ measurements; no triangulation or gap filling. */
+function buildSoundings(THREE: typeof import("three"), survey: Survey, scene: THREE.Scene) {
+  const positions: number[] = [];
+  const colors: number[] = [];
+  for (const point of survey.soundings ?? []) {
+    const { x, y } = project(survey, point.lat, point.lng);
+    positions.push(x, point.depth, -y);
+    const [r, g, b] = depthRgb(point.depth);
+    colors.push(r / 255, g / 255, b / 255);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+  const bed = new THREE.Points(geometry, new THREE.PointsMaterial({ vertexColors: true, size: 3, sizeAttenuation: false }));
+  scene.add(bed);
+  return bed;
 }
 
 function buildBed(THREE: typeof import("three"), survey: Survey, scene: THREE.Scene) {

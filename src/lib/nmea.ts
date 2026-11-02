@@ -5,6 +5,8 @@ export type NmeaFix = {
   cogDeg: number | null;
   /** Ship's head, degrees true. Null when the sentence has no heading. */
   headingDeg: number | null;
+  /** RMC/VTG report ground motion, including explicitly unavailable fields. */
+  motionUpdated?: boolean;
   valid: boolean;
 };
 
@@ -78,6 +80,7 @@ export function parseNmeaLine(line: string): NmeaFix | null {
       cogDeg: courseField(field[8]),
       headingDeg: null,
       valid: field[2] === "A",
+      motionUpdated: true,
     };
   }
 
@@ -108,7 +111,7 @@ export function parseNmeaLine(line: string): NmeaFix | null {
     const cogDeg = courseField(field[1]);
     const sogKn = speedField(field[5]);
     if (cogDeg == null && sogKn == null) return null;
-    return { lat: null, lng: null, sogKn, cogDeg, headingDeg: null, valid: true };
+    return { lat: null, lng: null, sogKn, cogDeg, headingDeg: null, valid: true, motionUpdated: true };
   }
 
   if (kind === "HDT" || kind === "THS") {

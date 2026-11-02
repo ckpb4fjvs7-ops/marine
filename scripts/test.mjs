@@ -17,6 +17,9 @@ const tests = [
   "src/lib/auth/sign-in-gate.test.ts",
   "src/lib/preview-path-prefix.test.ts",
   "tests/navigation.test.ts",
+  "tests/display-settings.test.ts",
+  "tests/speed-vector.test.ts",
+  "tests/network-udp-config.test.ts",
 ];
 const result = spawnSync(process.execPath, ["--experimental-strip-types", "--test", ...tests], {
   cwd: root,
